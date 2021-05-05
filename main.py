@@ -7,7 +7,6 @@ from sqlalchemy import extract,func, or_
 from datetime import datetime, date, timedelta   
 import uuid
 import shortuuid
-
 from .forms import addNewPlane, addNewAirport, changeStatus, addNewFlight
 
 main = Blueprint('main', __name__)
@@ -134,6 +133,8 @@ def staffHome():
         db.session.add(new_flight) 
         db.session.commit()
         return redirect(url_for('main.staffHome'))
+
+    
 
     
     return render_template('staffHome.html', form = new_plane_form, 

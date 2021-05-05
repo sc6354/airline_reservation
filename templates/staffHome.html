@@ -23,59 +23,50 @@
 </div>
 
 
-
-<div class="columns">
-	<div>
+<div>
 		<h2 class="title">Add New Plane</h2>
-	<div class='field is-grouped is-grouped-centered'>
-	<form method="POST" action="{{ url_for('main.staffHome') }}">
-		<div class="control has-icons-right"> 
-			<fieldset class="form-field">
-				{{ form.airline_name.label }}
-				{{ form.airline_name(size=20) }}
-			</fieldset>
-		</div>
-		<div class="control has-icons-right">
-			<fieldset class="form-field">
-				{{ form.airplane_id.label }}
-				{{ form.airplane_id }}
-			</fieldset>
-		</div>
-		<div class="control has-icons-right">
-			<fieldset class="form-field">
-				{{ form.seats.label }}
-				{{ form.seats }}
-			</fieldset>
-		</div>
+			<div class='field is-grouped is-grouped-centered'>
+			<form method="POST" action="{{ url_for('main.staffHome') }}">
+				<div class="control has-icons-right"> 
+					<fieldset class="form-field">
+						{{ form.airline_name.label }}
+						{{ form.airline_name(size=20) }}
+					</fieldset>
+				</div>
+				<div class="control has-icons-right">
+					<fieldset class="form-field">
+						{{ form.airplane_id.label }}
+						{{ form.airplane_id }}
+					</fieldset>
+				</div>
+				<div class="control has-icons-right">
+					<fieldset class="form-field">
+						{{ form.seats.label }}
+						{{ form.seats }}
+					</fieldset>
+				</div>
+				{{ form.submit }}
+			</form>
+ 	 </div>
 
-          {{ form.submit }}
-
-      </form>
-</div>
-
-<br><br><br>
-
-<div class="columns">
-	<div>
+<div>
 		<h2 class="title">Add New Airport</h2>
-	<div class='field is-grouped is-grouped-centered'>
-	<form method="POST" action="{{ url_for('main.staffHome') }}">
-		<div class="control has-icons-right"> 
-			<fieldset class="form-field">
-				{{ form2.airport_name.label }}
-				{{ form2.airport_name(size=20) }}
-			</fieldset>
-		</div>
-		<div class="control has-icons-right">
-			<fieldset class="form-field">
-				{{ form2.airport_city.label }}
-				{{ form2.airport_city }}
-			</fieldset>
-		</div>
-
-          {{ form.submit }}
-
-      </form>
+			<div class='field is-grouped is-grouped-centered'>
+			<form method="POST" action="{{ url_for('main.staffHome') }}">
+				<div class="control has-icons-right"> 
+					<fieldset class="form-field">
+						{{ form2.airport_name.label }}
+						{{ form2.airport_name(size=20) }}
+					</fieldset>
+				</div>
+				<div class="control has-icons-right">
+					<fieldset class="form-field">
+						{{ form2.airport_city.label }}
+						{{ form2.airport_city }}
+					</fieldset>
+				</div>
+				{{ form.submit }}
+			</form>
 </div>
 
 
@@ -174,7 +165,16 @@
 </div>
 
 
+<form method="POST" action="{{ url_for('main.index') }}">
+        <div class="column">
+            <div class="control">
+              <input class="input" type="date" name="date" placeholder="Date" autofocus="">
+            </div>
+        </div>
+        <button class="button is-block is-info is-rounded is-hovered is-fullwidth">Submit</button>
+
+    </form>
 
 
-<br><br><br>
+
 {% endblock %}
