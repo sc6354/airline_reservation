@@ -18,6 +18,8 @@ def userLogin():
         pw = request.form.get('password')
         remember = True if request.form.get('remember') else False
         curr_user = users.query.filter_by(username=username).first()
+        curr_staff = airline_staff.query.filter_by(username=username).first()
+        curr_customer = customer.query.filter_by(email=username).first()
 
         if not username:
             flash('Email is required.')
@@ -28,8 +30,13 @@ def userLogin():
         elif not curr_user and not check_password_hash(curr_user.password, pw):
             flash('Login unsuccefully, try again.')
             return (redirect(url_for('auth.login')))
+        else:
+            login_user(curr_user, remember = remember)
+            if curr_staff:
+                return redirect(url_for('main.staffHome'))
+            if curr_customer:
+                return redirect(url_for('main.profile'))
 
-        login_user(curr_user, remember = remember)
         return redirect(url_for('main.index'))
     return render_template('login.html')
 
