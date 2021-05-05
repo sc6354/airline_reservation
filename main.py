@@ -165,8 +165,24 @@ def agentHome():
             .join(airport2, airport2.airport_name == flight.arrival_airport)\
             .filter(flight.departure_time >= today_date).all()
 
+    commission_query = flight.query.with_entities(func.sum(flight.price))\
+                         .join(ticket, ticket.flight_num == flight.flight_num)\
+                         .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                         .filter(purchases.booking_agent_id == agent_id[0]).all()
+    commission = .1*float(commission_query[0][0])
+
+    ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
+                         .join(ticket, ticket.flight_num == flight.flight_num)\
+                         .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                         .filter(purchases.booking_agent_id == agent_id[0]).all()
+    num_of_tickets = int(ticket_query[0][0])
+    ave_commission = commission/num_of_tickets
+
+
     return render_template('agentHome.html', name = fname, email = current_user.username, 
-                                           all_upcoming_flights = upcoming_flights)
+                                           all_upcoming_flights = upcoming_flights,
+                                           all_commission = commission, num_of_tickets_sold=num_of_tickets, 
+                                           average=ave_commission)
 
 
 

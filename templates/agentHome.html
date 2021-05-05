@@ -20,6 +20,7 @@
 		{% else %}
 			<h4> Here are upcoming flights for your clients</h4>
             {{ all_upcoming_flights }}
+        
         {% endif %}
     {% endwith %}
 	</div>
@@ -62,7 +63,19 @@
 	</div>
 </div>
 
-
+<div>
+    <br><br><br><br>
+    <div class="content is-large">
+        <h4> Commission History </h4>
+    </div>
+	<h1 class='is-family-monospace-danger'>
+    <ul>
+		<li> Total Commisssion: ${{ all_commission }} </li>
+        <li> Totol Number of Tickets Sold:  {{ num_of_tickets_sold}}</li>
+        <li> Average Commission: ${{ average }} </li>
+    </ul>
+	</h1>
+</div>
 
 
 
