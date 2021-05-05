@@ -20,6 +20,7 @@ def userLogin():
         curr_user = users.query.filter_by(username=username).first()
         curr_staff = airline_staff.query.filter_by(username=username).first()
         curr_customer = customer.query.filter_by(email=username).first()
+        curr_agent = booking_agent.query.filter_by(email=username).first()
 
         if not username:
             flash('Email is required.')
@@ -36,6 +37,8 @@ def userLogin():
                 return redirect(url_for('main.staffHome'))
             if curr_customer:
                 return redirect(url_for('main.profile'))
+            if curr_agent:
+                return redirect(url_for('main.agentHome'))
 
         return redirect(url_for('main.index'))
     return render_template('login.html')

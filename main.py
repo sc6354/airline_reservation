@@ -144,7 +144,7 @@ def staffHome():
                                              form4 = flight_form)
 
 
-@main.route('/staff_home',methods=["POST", "GET"])
+@main.route('/agent_home',methods=["POST", "GET"])
 @login_required
 def agentHome():
     return render_template('agentHome.html')
