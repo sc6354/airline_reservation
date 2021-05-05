@@ -175,14 +175,32 @@ def agentHome():
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
                          .filter(purchases.booking_agent_id == agent_id[0]).all()
+
     num_of_tickets = int(ticket_query[0][0])
     ave_commission = commission/num_of_tickets
+
+    top5byticket = db.session.query(purchases.customer_email, func.count(purchases.customer_email))\
+                             .filter(purchases.booking_agent_id == agent_id[0])\
+                             .group_by(purchases.customer_email).limit(5).all()
+
+    top5_labels = [row[0] for row in top5byticket]
+    top5_values = [row[1] for row in top5byticket]
+
+    top5bycommission = db.session.query(purchases.customer_email, func.sum(flight.price))\
+                                 .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                 .join(flight, flight.flight_num == ticket.flight_num)\
+                                 .filter(purchases.booking_agent_id == agent_id[0])\
+                                 .group_by(purchases.customer_email).limit(5).all()
+    top5_com = [row[0] for row in top5bycommission]
+    top_com = [.1*float(row[1]) for row in top5bycommission]
 
 
     return render_template('agentHome.html', name = fname, email = current_user.username, 
                                            all_upcoming_flights = upcoming_flights,
-                                           all_commission = commission, num_of_tickets_sold=num_of_tickets, 
-                                           average=ave_commission)
+                                           all_commission = commission, 
+                                           num_of_tickets_sold=num_of_tickets, 
+                                           average=ave_commission, x=top5_labels, y=top5_values, 
+                                           x2=top5_com, y2=top_com)
 
 
 
