@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from . import db 
 from .models import *
 from sqlalchemy.orm import aliased
-from sqlalchemy import extract,func, or_
+from sqlalchemy import extract,func, or_, desc
 from datetime import datetime, date, timedelta   
 import uuid
 import shortuuid
@@ -258,8 +258,6 @@ def views():
                                  .join(flight, flight.flight_num == ticket.flight_num)\
                                  .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
                                  .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
-    #agents = [row[1] for row in top5ByCommission]
-    #commission = [.1*float(row[2]) for row in top5ByCommission]
     agents=[]
     for row in top5ByCommission:
         id= row[0]
@@ -267,12 +265,30 @@ def views():
         commission = .1*float(row[2])
         agents.append([id, email, commission])
 
+    topDestinations = db.session.query(airport.airport_city, func.count(ticket.flight_num).label('total tickets'))\
+                                .join(flight, flight.arrival_airport==airport.airport_name)\
+                                .join(ticket, ticket.flight_num == flight.flight_num)\
+                                .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                                .filter(purchases.purchase_date <= date.today())\
+                                .filter(purchases.purchase_date >= (date.today() - timedelta(days=60)))\
+                                .group_by(airport.airport_city).order_by(desc('total tickets')).limit(3).all()
+
+    topDestinationsYear = db.session.query(airport.airport_city, func.count(ticket.flight_num).label('total tickets'))\
+                                .join(flight, flight.arrival_airport==airport.airport_name)\
+                                .join(ticket, ticket.flight_num == flight.flight_num)\
+                                .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                                .filter(purchases.purchase_date <= date.today())\
+                                .filter(purchases.purchase_date >= (date.today() - timedelta(days=365)))\
+                                .group_by(airport.airport_city).order_by(desc('total tickets')).limit(3).all()
+
   
     return render_template('views.html', airline = airline[0], 
                                          frequent_flyers = top_flyers,
                                          top_agents_past_month = topAgentsByticket30,
                                          top_agents_year = topAgentsByticketYear,
-                                         top_agents_commission = agents)
+                                         top_agents_commission = agents,
+                                         top_places_in_3_months = topDestinations,
+                                         top_places_in_year = topDestinationsYear)
 
 
 @main.route('/flights', methods=["POST", 'GET'])

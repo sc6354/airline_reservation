@@ -13,7 +13,6 @@
             </div>
 		{% else %}
 			<h4> <strong>{{ airline }}</strong> frequent flyers:</h4>
-			{{ top_agents_past_month }}
 
         {% endif %}
     {% endwith %}
@@ -148,6 +147,66 @@
 	</div>
 
 
+
+</div>
+
+
+
+<div>
+	<br><br><br>
+	<div class="content is-large">
+		<h4> Top Destinations</h4>
+	</div>
+
+	<div class="table-container">
+		{% if top_places_in_3_months%}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+					<th colspan="3"><strong><h3>In the Past 3 months </strong></th>
+				</tr>
+				<tr>
+					<th>Destination</th>
+					<th>Number of Tickets Sold</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in top_places_in_3_months %}
+				<tr> 
+				<td> {{ row[0] }} </td>
+				<td> {{ row[1] }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
+
+	<br>
+
+	<div class="table-container">
+		{% if top_places_in_3_months%}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+					<th colspan="3"><strong><h3>In the Past Year </strong></th>
+				</tr>
+				<tr>
+					<th>Destination</th>
+					<th>Number of Tickets Sold</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in top_places_in_year %}
+				<tr> 
+				<td> {{ row[0] }} </td>
+				<td> {{ row[1] }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
 
 </div>
 
