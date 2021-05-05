@@ -1,0 +1,20 @@
+{% extends "base2.html" %}
+
+{% block content %}
+
+<div class="column is-4 is-offset-4">
+    <h1 class="title">All Flights in this Period</h1>
+    {% if (flights|length) == 0%}
+        <h1> No flights found. </h1>
+            {{ flights| length }} Flights.
+    {% endif %}
+</div>
+
+
+{% if flights %}
+    {{ flights }}
+{% endif %}
+
+
+
+{% endblock %}

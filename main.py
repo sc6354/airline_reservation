@@ -7,7 +7,7 @@ from sqlalchemy import extract,func, or_, desc
 from datetime import datetime, date, timedelta   
 import uuid
 import shortuuid
-from .forms import addNewPlane, addNewAirport, changeStatus, addNewFlight
+from .forms import *
 
 main = Blueprint('main', __name__)
 
@@ -99,6 +99,7 @@ def staffHome():
     airport_form = addNewAirport(request.form)
     status_form = changeStatus(request.form)
     flight_form = addNewFlight(request.form)
+    more_flights = viewMoreFlights(request.form)
 
 
     time_limit = date.today() + timedelta(days=30)
@@ -155,13 +156,40 @@ def staffHome():
         flash('New Flight Successfully Added.')
         return redirect(url_for('main.staffHome'))
     
+    if more_flights.validate():
+        o = more_flights.origin.data
+        d = more_flights.destination.data
+        s = more_flights.start_day.data
+        e = more_flights.end_day.data
+        airport1 = aliased(airport, name ='origin')
+        airport2 = aliased(airport, name = 'destination')
+        result = computate_uncertainty(o, d,s,e)
+
+        #more_flights = db.session.query(flight, airport1, airport2)\
+                                 #.join(airport1, airport1.airport_name == flight.departure_airport)\
+                                 #.join(airport2, airport2.airport_name == flight.arrival_airport)\
+                                 #.filter(flight.departure_time >= start)\
+                                 #.filter(flight.departure_time <= end).all()
+
+        return render_template('moreFlights.html', flights=result)
+    
     return render_template('staffHome.html', form = new_plane_form, 
                                              form2 = airport_form,
                                              form3 = status_form,
                                              form4 = flight_form,
+                                             form5 = more_flights,
                                              name = staff_name[0],
                                              airline = airline[0], 
                                              all_upcoming_flights = flightsIn30Days)
+
+
+@main.route('/more_flights', methods = ["POST"])
+@login_required
+def moreFlights():
+    return render_template('moreFlights.html')
+
+
+
 
 
 @main.route('/agent_home',methods=["POST", "GET"])
@@ -221,6 +249,7 @@ def agentHome():
                                            average=ave_commission, x=top5_labels, y=top5_values, 
                                            x2=top5_com, y2=top_com)
 
+    
 @login_required
 @main.route('/views', methods = ["GET"])
 def views():
