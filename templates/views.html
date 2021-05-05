@@ -2,12 +2,48 @@
 {% block title %} Home {% endblock %}
 {% block content %}
 
-<div class="content is-large">
-	<h1 class='is-family-monospace-danger'>
-		Welcome, !
 
-	</h1>
+<div>
+	<br><br><br><br>
+	<div class="content is-large">
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div>
+            	<h4> {{ messages[0] }}</h4>
+            </div>
+		{% else %}
+			<h4> <strong>{{ airline }}</strong> frequent flyers:</h4>
+			{{ top_agents_past_month }}
+
+        {% endif %}
+    {% endwith %}
+	</div>
+
+	<div class="table-container">
+		{% if frequent_flyers %}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+					<th>Customer Name</th>
+					<th>Email</th>
+					<th>Number of Tickets Purchased</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in frequent_flyers %}
+				<tr> 
+				<td> {{ row.name }} </td>
+				<td> {{ row.customer_email }} </td>
+				<td> {{ row[2] }} </td>
+				
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
 </div>
+
 
 
 <div>
@@ -19,35 +55,31 @@
             	<h4> {{ messages[0] }}</h4>
             </div>
 		{% else %}
-			<h4> Here are upcoming flights for <strong>{{ airline }}</strong> </h4>
+			<h4> Top Agents</h4>
+			{{ top_agents_past_month }}
+
         {% endif %}
     {% endwith %}
 	</div>
 
 	<div class="table-container">
-		{% if all_upcoming_flights %}
+		<p> <strong>By tickets sold in the past month </strong></p>
+		{% if top_agents_past_month %}
 		<table class="table is-fullwidth">
 			<thead>
 				<tr>
-					<th>Flight Number</th>
-					<th>Route</th>
-					<th>Origin</th>
-					<th>Destination</th>
-					<th>Departing Time</th>
-					<th>Scheduled Arrival Time</th>
-					<th>Status</th>
+					<th>Agent ID</th>
+					<th>Email</th>
+					<th>Number of Tickets Sold</th>
 				</tr>
 			</thred>
 			<tbody>
-				{% for row in all_upcoming_flights %}
+				{% for row in top_agents_past_month %}
 				<tr> 
-				<td> {{ row.flight.flight_num }} </td>
-				<td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
-				<td> {{ row.origin.airport_city }} </td>
-				<td> {{ row.destination.airport_city }} </td>
-				<td> {{ row.flight.departure_time}} </td>
-				<td> {{ row.flight.arrival_time}} </td>
-				<td> {{ row.flight.status}} </td>
+				<td> {{ row.booking_agent_id }} </td>
+				<td> {{ row.email }} </td>
+				<td> {{ row[2] }} </td>
+				
 				</tr>
 				{% endfor %}
 			</tbody>
@@ -55,8 +87,6 @@
 		{% endif %}
 	</div>
 </div>
-
-
 
 
 

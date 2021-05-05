@@ -224,20 +224,30 @@ def agentHome():
 @login_required
 @main.route('/views', methods = ["GET"])
 def views():
-    time_limit = date.today() + timedelta(days=30)
+    ## ticket and purchases. customers
+    time_limit = date.today() - timedelta(days=365)
+    past_month = date.today() - timedelta(days=30)
     airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
-    airport1 = aliased(airport, name ='origin')
-    airport2 = aliased(airport, name = 'destination')
+    #airport1 = aliased(airport, name ='origin')
+    #airport2 = aliased(airport, name = 'destination')
 
-    flightsIn30Days = db.session.query(flight, airport1, airport2)\
-                                .join(airport1, airport1.airport_name == flight.departure_airport)\
-                                .join(airport2, airport2.airport_name == flight.arrival_airport)\
-                                .filter(flight.departure_time >= date.today())\
-                                .filter(flight.departure_time <= time_limit).all()
+    top_flyers = db.session.query(customer.name, purchases.customer_email, func.count(purchases.customer_email))\
+                           .filter(purchases.purchase_date <= date.today())\
+                           .filter(purchases.purchase_date >= time_limit)\
+                           .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                           .join(customer, customer.email == purchases.customer_email)\
+                           .group_by(customer.name,purchases.customer_email).all()
 
+    topAgentsByticket30 = db.session.query(purchases.booking_agent_id, booking_agent.email, func.count(purchases.booking_agent_id))\
+                            .filter(purchases.purchase_date <= date.today())\
+                            .filter(purchases.purchase_date >= past_month)\
+                            .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
+                            .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
 
+  
     return render_template('views.html', airline = airline[0], 
-                                         all_upcoming_flights = flightsIn30Days)
+                                         frequent_flyers = top_flyers,
+                                         top_agents_past_month = topAgentsByticket30)
 
 
 @main.route('/flights', methods=["POST", 'GET'])
