@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Agent Login</h3>
+
+
+<div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/agent_login">
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Email" autofocus="">
+                </div>
+            </div>
+
+            <div id= 'agent' class="field">
+                <div class="control">
+                    <input class="input" type="agent_id" name="agent_id" placeholder="Booking Agent ID">
+                </div>
+            </div>
+           
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="password" name="password" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="checkbox">
+                    <input type="checkbox">
+                    Remember me
+                </label>
+            </div>
+
+            <div class="field is-grouped is-grouped-centered">
+                <p class="control is-expanded">
+                    <button class="button is-info is-primary">Login</button>
+                </p>
+                <p class="control">
+                    <a href="{{ url_for('auth.login') }}" class="button is-light">Go Back</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

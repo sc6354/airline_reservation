@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  ~ Search for Flights ~
+</h1>
+<h2>
+</h2>
+<h2 class="subtitle">
+  Your next destination awaits...
+</h2>
+<h2>
+ Book your flight today! 
+</h2>
+
+<div class="column is-4 is-offset-4">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          <div class="notification is-danger">
+              {{ messages[0] }}
+          </div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('main.index') }}">
+        <div class="column" >
+            <div class="control">
+              <input class="input" type="departure" name="departure" placeholder="Origin" autofocus="">
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="control">
+              <input class="input" type="destination" name="destination" placeholder="Destination" autofocus="">
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="control">
+              <input class="input" type="date" name="date" placeholder="Date" autofocus="">
+            </div>
+        </div>
+
+        <button class="button is-block is-info is-rounded is-hovered is-fullwidth">Search</button>
+
+    </form>
+</div>
+
+{% endblock %}            

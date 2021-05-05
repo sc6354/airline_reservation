@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="notification is-danger">
+  <button class="delete"></button>
+  We’re here for you.
+  It’s important to us that you get the help you need during these rapidly changing times. 
+  <strong>Right now</strong>, there are multiple travel waivers in place. 
+  If you want to change, cancel or rebook your flight, you can do so right in your <a href="{{ url_for('main.profile') }}">account</a>.
+</div>
+
+
+
+<div class="column is-4 is-offset-4">
+    <h1 class="title">Available Flights</h1>
+    {{ flights }}
+</div>
+
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+      <div class="notification is-danger">
+          {{ messages[0] }}
+      </div>
+  {% endif %}
+{% endwith %}
+
+{% if flights %}
+<div class="table-container">
+  <table class="table is-fullwidth">
+      <thead>
+        <tr>
+            <th>Airline </th>
+            <th>Aircraft Id</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Flight Number</th>
+            <th>Route </th>
+            <th>Departing Time</th>
+            <th>Arrival Time</th>
+            <th>Available Seats </th>
+            <th>Price</th>
+            <th>Purchase Flight </th>
+        </tr>
+      </thred>
+      <tbody>
+          {% for row in flights %}
+          <tr> 
+              <td> {{ row.flight.airline_name}}</td>
+              <td> {{ row.flight.airplane_id }} </td>
+              <td> {{ row.origin.airport_city }} </td>
+              <td> {{ row.destination.airport_city }} </td>
+              <td> {{ row.flight.flight_num }} </td>
+              <td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+              <td> {{ row.flight.departure_time }} </td>
+              <td> {{ row.flight.arrival_time }} </td>
+              <td> {{ row.airplane.seats}} </td>
+              <td> {{ row.flight.price }} </td>
+              <td> 
+                <form method="POST" action="/flights">
+                  <div class="field">
+                    <div class="control">
+                        <input class="input" type='number' name="flight" placeholder="Enter Fight Number" autofocus="">
+                    </div>
+                  </div>
+                  <div class="field">
+                      <div class="control">
+                          <input class="input" name="airline" placeholder="Enter Airline">
+                      </div>
+                  </div>
+                  <div class="field is-grouped is-grouped-centered">
+                   <p class="control">
+                      <button type='submit' value="{{ row.flight.flight_num }}" class="button is-info is-primary">Select</button>
+                  </p>
+                  </div>
+                </form> 
+              </td>
+          </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+    const $notification = $delete.parentNode;
+
+    $delete.addEventListener('click', () => {
+      $notification.parentNode.removeChild($notification);
+    });
+  });
+});
+
+function flights(flight_num) {
+    fetch('http://127.0.0.1:5000/flights', 
+        {method: 'POST'}
+    )
+}
+
+</script>
+
+
+{% endblock %}
+
+
+

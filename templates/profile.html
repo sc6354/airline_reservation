@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+    const $notification = $delete.parentNode;
+
+    $delete.addEventListener('click', () => {
+      $notification.parentNode.removeChild($notification);
+    });
+  });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+<div class="notification is-link">
+  <button class="delete"></button>
+  Airlines have their own <strong>policies and rules.</strong> Please check their website for more information.
+</div>
+
+<div class="content is-large">
+	<h1 class='is-family-monospace-danger'>
+		Welcome, {{ name.name }}!
+
+	</h1>
+</div>
+
+<div>
+<br><br><br><br>
+	<div class="content is-large">
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div>
+            	<h4> {{ messages[0] }} Click <a href="{{ url_for('main.index') }}"><i> here</i></a> to search for flights. </h4>
+            </div>
+		{% else %}
+			<h4> Here are your upcoming flights</h4>
+        {% endif %}
+    {% endwith %}
+	</div>
+
+	<div class="table-container">
+		{% if all_upcoming_flights %}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+				    <th>Purchase Date</th>
+					<th>Ticket Id</th>
+					<th>Airline </th>
+					<th>Flight Number</th>
+					<th>Route</th>
+					<th>Origin</th>
+					<th>Destination</th>
+					<th>Departing Time</th>
+					<th>Arrival Time</th>
+					<th>Status</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in all_upcoming_flights %}
+				<tr> 
+				    <td> {{ row.purchases.purchase_date }} </td>
+					<td> {{ row.ticket.ticket_id}} </td>
+					<td> {{ row.flight.airline_name}} </td>
+					<td> {{ row.flight.flight_num }} </td>
+					<td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+					<td> {{ row.origin.airport_city}} </td>
+					<td> {{ row.destination.airport_city}} </td>
+					<td> {{ row.flight.departure_time }} </td>
+					<td> {{ row.flight.arrival_time }} </td>
+					<td> {{ row.flight.status }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
+</div>
+
+  
+<div>
+<br><br>
+	<div class="content is-large">
+		<h4> Places you visited</h4>
+	</div>
+	<div class="table-container">
+		{% if all_past_flights %}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+				    <th>Purchase Date</th>
+					<th>Ticket Id</th>
+					<th>Airline</th>
+					<th>Flight Number</th>
+					<th>Route</th>
+					<th>Origin</th>
+					<th>Destination</th>
+					<th>Departing Time</th>
+					<th>Arrival Time</th>
+					<th>Status</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in all_past_flights %}
+				<tr> 
+				    <td> {{ row.purchases.purchase_date }} </td>
+					<td> {{ row.ticket.ticket_id}} </td>
+					<td> {{ row.flight.airline_name}} </td>
+					<td> {{ row.flight.flight_num }} </td>
+					<td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+					<td> {{ row.origin.airport_city}} </td>
+					<td> {{ row.destination.airport_city}} </td>
+					<td> {{ row.flight.departure_time }} </td>
+					<td> {{ row.flight.arrival_time }} </td>
+					<td> {{ row.flight.status }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
+</div>
+
+
+<br><br>
+	<div class="content is-large">
+		<h4> Your Spending History</h4>
+		{% if all_spending %}
+			{{ all_spending }}
+			{{ x }} 
+			{{ y }}
+		<input type="range" class="slider" value="5" min="30" max="50" id="points">
+
+		<canvas id='barChart' width='1150' height='400'></canvas>
+		<script> 
+			var ctx = document.getElementById('barChart').getContext('2d');
+			var barChart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: {{ x | safe }},
+					datasets: [{
+						label: "Spending History",
+						data: {{ y | safe }},
+						borderWidth:1}]},
+					options: {
+						responsive:false
+					}
+			});
+		</script>
+
+
+		{% else %}
+			<h6> <strong>You have no spending history. </strong></h6>
+		{% endif %}
+		
+	</div>
+	
+</div>
+	    
+{% endblock %}

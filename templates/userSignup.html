@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Sign Up to Book Your Flight</h3>
+
+    <div class="field">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }} Go to <a href="{{ url_for('auth.login') }}">login page</a>.
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+        <form method="POST" action="/user_signup">
+
+        
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Email" autofocus="">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="text" name="name" placeholder="Name" autofocus="">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="password" name="password" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="tel" name="phone_number" placeholder="Phone Number">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="address" name="address" placeholder="Address">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="city" name="city" placeholder="City">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="state" name="state" placeholder="State">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="passport_num" name="passport_num" placeholder="Passport Number">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="passport_country" name="passport_country" placeholder="Passport Country">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="passport_expiration" name="date" placeholder="Passport Expiration Date">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="dob" name="date" placeholder="Date of Birth">
+                </div>
+            </div>
+    
+
+        {% if(option=="Booking Agent") %}
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Email" autofocus="">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="password" name="password" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="id" name="id" placeholder="Agent ID">
+                </div>
+            </div>
+
+        {% endif %}
+
+        {% if(option=="Airline Staff") %}
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="email" name="email" placeholder="Email" autofocus="">
+                </div>
+            </div>
+
+        {% endif %}
+
+
+         <div class="field">
+            <div class="control">
+                <label class="checkbox">
+                <input type="checkbox">
+                I agree to the <a href="#">terms and conditions</a>
+                </label>
+            </div>
+        </div>
+            <button class="button is-block is-info is-fullwidth">Sign Up</button>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

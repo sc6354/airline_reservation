@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="column is-4 is-offset-4">
+        <h3 class="title">Sign Up</h3>
+
+    <div class="dropdown is-hoverable is-4 is-offset-4">
+        <div class="dropdown-trigger">
+            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu2">
+                <span> Select User Type </span>
+            </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu2" role="menu">
+            <div class="dropdown-content">
+                <hr class="dropdown-divider">
+                <a href="{{ url_for('auth.agentSignup') }}" class="dropdown-item">
+                    <strong>Agent</strong> 
+                </a>
+                <hr class="dropdown-divider">
+                <a href="{{ url_for('auth.userSignup') }}" class="dropdown-item">
+                    <strong>Customer</strong> 
+                </a>
+                <hr class="dropdown-divider">
+                <a href="{{ url_for('auth.staffSignup') }}" class="dropdown-item">
+                    <strong>Airline Staff</strong> 
+                </a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
