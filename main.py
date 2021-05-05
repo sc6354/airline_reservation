@@ -250,11 +250,29 @@ def views():
                             .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
                             .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
 
+    top5ByCommission = db.session.query(purchases.booking_agent_id, booking_agent.email, func.sum(flight.price))\
+                                 .filter(purchases.booking_agent_id.isnot(None))\
+                                 .filter(purchases.purchase_date <= date.today())\
+                                 .filter(purchases.purchase_date >= time_limit)\
+                                 .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                 .join(flight, flight.flight_num == ticket.flight_num)\
+                                 .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
+                                 .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
+    #agents = [row[1] for row in top5ByCommission]
+    #commission = [.1*float(row[2]) for row in top5ByCommission]
+    agents=[]
+    for row in top5ByCommission:
+        id= row[0]
+        email = row[1]
+        commission = .1*float(row[2])
+        agents.append([id, email, commission])
+
   
     return render_template('views.html', airline = airline[0], 
                                          frequent_flyers = top_flyers,
                                          top_agents_past_month = topAgentsByticket30,
-                                         top_agents_year = topAgentsByticketYear )
+                                         top_agents_year = topAgentsByticketYear,
+                                         top_agents_commission = agents)
 
 
 @main.route('/flights', methods=["POST", 'GET'])
