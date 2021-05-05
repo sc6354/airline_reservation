@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, session, request, flash, redirect, url_for, make_response
 from flask_login import login_required, current_user
 from . import db 
-from .models import flight, purchases, ticket, airport, airplane, ticket, purchases, customer, airplane, booking_agent
+from .models import *
 from sqlalchemy.orm import aliased
 from sqlalchemy import extract,func, or_
 from datetime import datetime, date, timedelta   
@@ -100,6 +100,20 @@ def staffHome():
     status_form = changeStatus(request.form)
     flight_form = addNewFlight(request.form)
 
+
+    time_limit = date.today() + timedelta(days=30)
+    staff_name = db.session.query(airline_staff.first_name).filter(airline_staff.username==current_user.username).first()
+    airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
+    airport1 = aliased(airport, name ='origin')
+    airport2 = aliased(airport, name = 'destination')
+
+    flightsIn30Days = db.session.query(flight, airport1, airport2)\
+                                .join(airport1, airport1.airport_name == flight.departure_airport)\
+                                .join(airport2, airport2.airport_name == flight.arrival_airport)\
+                                .filter(flight.departure_time >= date.today())\
+                                .filter(flight.departure_time <= time_limit).all()
+
+
     if new_plane_form.validate():
         new_plane = airplane(airline_name = new_plane_form.airline_name.data, 
                              airplane_id = new_plane_form.airplane_id.data, 
@@ -144,13 +158,15 @@ def staffHome():
     return render_template('staffHome.html', form = new_plane_form, 
                                              form2 = airport_form,
                                              form3 = status_form,
-                                             form4 = flight_form)
+                                             form4 = flight_form,
+                                             name = staff_name[0],
+                                             airline = airline[0], 
+                                             all_upcoming_flights = flightsIn30Days)
 
 
 @main.route('/agent_home',methods=["POST", "GET"])
 @login_required
 def agentHome():
-    
     today_date = date.today()
     email = "%{0}%".format(current_user.username)
     airport1 = aliased(airport, name ='origin')
@@ -208,7 +224,20 @@ def agentHome():
 @login_required
 @main.route('/views', methods = ["GET"])
 def views():
-    return render_template('views.html')
+    time_limit = date.today() + timedelta(days=30)
+    airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
+    airport1 = aliased(airport, name ='origin')
+    airport2 = aliased(airport, name = 'destination')
+
+    flightsIn30Days = db.session.query(flight, airport1, airport2)\
+                                .join(airport1, airport1.airport_name == flight.departure_airport)\
+                                .join(airport2, airport2.airport_name == flight.arrival_airport)\
+                                .filter(flight.departure_time >= date.today())\
+                                .filter(flight.departure_time <= time_limit).all()
+
+
+    return render_template('views.html', airline = airline[0], 
+                                         all_upcoming_flights = flightsIn30Days)
 
 
 @main.route('/flights', methods=["POST", 'GET'])

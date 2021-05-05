@@ -4,170 +4,196 @@
 
 <div class="content is-large">
 	<h1 class='is-family-monospace-danger'>
-		Welcome, !
-
+		Welcome, {{ name }} !
 	</h1>
-</div>
-
-<br><br><br><br>
-<div class="content is-large">
-{% with messages = get_flashed_messages() %}
-	{% if messages %}
-		<div class="notification is-danger">
-                {{ messages[0] }}
-        </div>
-		<div>
-			<h4> No upcoming flights. </h4>
-			{{ flight }}
-		</div>
-	{% else %}
-		<h4> </h4>
-	{% endif %}
-{% endwith %}
 </div>
 
 
 <div>
-		<h2 class="title">Add New Plane</h2>
-			<div class='field is-grouped is-grouped-centered'>
-			<form method="POST" action="{{ url_for('main.staffHome') }}">
-				<div class="control has-icons-right"> 
-					<fieldset class="form-field">
-						{{ form.airline_name.label }}
-						{{ form.airline_name(size=20) }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form.airplane_id.label }}
-						{{ form.airplane_id }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form.seats.label }}
-						{{ form.seats }}
-					</fieldset>
-				</div>
-				{{ form.submit }}
-			</form>
- 	 </div>
+	<br>
+	<div class="content is-large">
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<div>
+				<h4> {{ messages[0] }}</h4>
+			</div>
+		{% else %}
+			<h4> Here are upcoming flights for your airline, <strong><em>{{ airline }}</em></strong> </h4>
+		{% endif %}
+	{% endwith %}
+	</div>
 
-
-<div><br><br>
-		<h2 class="title">Add New Airport</h2>
-			<div class='field is-grouped is-grouped-centered'>
-			<form method="POST" action="{{ url_for('main.staffHome') }}">
-				<div class="control has-icons-right"> 
-					<fieldset class="form-field">
-						{{ form2.airport_name.label }}
-						{{ form2.airport_name(size=20) }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form2.airport_city.label }}
-						{{ form2.airport_city }}
-					</fieldset>
-				</div>
-				{{ form.submit }}
-			</form>
-</div>
-
-<div><br><br>
-	<h2 class="title">Update Flight Status</h2>
-		<div class='field is-grouped is-grouped-centered'>
-			<form method="POST" action="{{ url_for('main.staffHome') }}">
-				<div class="control has-icons-right"> 
-					<fieldset class="form-field">
-						{{ form3.flight_num.label }}
-						{{ form3.flight_num(size=20) }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form3.status.label }}
-						{{ form3.status }}
-					</fieldset>
-				</div>
-				{{ form.submit }}
-			</form>
-		</div>
-
-<div><br><br>
-	<h2 class="title">Add New Flight</h2>
-		<div class='field is-grouped is-grouped-centered'>
-			<form method="POST" action="{{ url_for('main.staffHome') }}">
-			{{ form4.csrf_token }}
-				<div class="control has-icons-right"> 
-					<fieldset class="form-field">
-						{{ form4.airline_name.label }}
-						{{ form4.airline_name(size=20) }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.flight_num.label }}
-						{{ form4.flight_num }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.departure.label }}
-						{{ form4.departure }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.departure_time.label }}
-						{{ form4.departure_time }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.arrival.label }}
-						{{ form4.arrival }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.arrival_time.label }}
-						{{ form4.arrival_time }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.price.label }}
-						{{ form4.price}}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.status.label }}
-						{{ form4.status }}
-					</fieldset>
-				</div>
-				<div class="control has-icons-right">
-					<fieldset class="form-field">
-						{{ form4.airplane_id.label }}
-						{{ form4.airplane_id }}
-					</fieldset>
-				</div>
-				{{ form.submit }}
-			</form>
-		</div>
+	<div class="table-container">
+		{% if all_upcoming_flights %}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+					<th>Flight Number</th>
+					<th>Route</th>
+					<th>Origin</th>
+					<th>Destination</th>
+					<th>Departing Time</th>
+					<th>Scheduled Arrival Time</th>
+					<th>Status</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in all_upcoming_flights %}
+				<tr> 
+				<td> {{ row.flight.flight_num }} </td>
+				<td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+				<td> {{ row.origin.airport_city }} </td>
+				<td> {{ row.destination.airport_city }} </td>
+				<td> {{ row.flight.departure_time}} </td>
+				<td> {{ row.flight.arrival_time}} </td>
+				<td> {{ row.flight.status}} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
 </div>
 
 <div class='container'>
-	<form method="POST" action="{{ url_for('main.index') }}">
-		<div class="column">
-			<div class="control">
-			<input class="input" type="date" name="date" placeholder="Date" autofocus="">
-			</div>
-		</div>
-		<button class="button is-block is-info is-rounded is-hovered is-fullwidth">Submit</button>
+	<br><br><br>
+	<div class="content is-large">
+		<h4 class='is-family-monospace-danger'>
+			Edit and Update Flights Here
+		</h4>
+	</div>
 
-    </form>
+	<div>
+			<h2 class="title">Add New Plane</h2>
+				<div class='field is-grouped is-grouped-centered'>
+				<form method="POST" action="{{ url_for('main.staffHome') }}">
+					<div class="control has-icons-right"> 
+						<fieldset class="form-field">
+							{{ form.airline_name.label }}
+							{{ form.airline_name(size=20) }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form.airplane_id.label }}
+							{{ form.airplane_id }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form.seats.label }}
+							{{ form.seats }}
+						</fieldset>
+					</div>
+					{{ form.submit }}
+				</form>
+		</div>
+
+
+	<div><br><br>
+			<h2 class="title">Add New Airport</h2>
+				<div class='field is-grouped is-grouped-centered'>
+				<form method="POST" action="{{ url_for('main.staffHome') }}">
+					<div class="control has-icons-right"> 
+						<fieldset class="form-field">
+							{{ form2.airport_name.label }}
+							{{ form2.airport_name(size=20) }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form2.airport_city.label }}
+							{{ form2.airport_city }}
+						</fieldset>
+					</div>
+					{{ form.submit }}
+				</form>
+	</div>
+
+	<div><br><br>
+		<h2 class="title">Update Flight Status</h2>
+			<div class='field is-grouped is-grouped-centered'>
+				<form method="POST" action="{{ url_for('main.staffHome') }}">
+					<div class="control has-icons-right"> 
+						<fieldset class="form-field">
+							{{ form3.flight_num.label }}
+							{{ form3.flight_num(size=20) }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form3.status.label }}
+							{{ form3.status }}
+						</fieldset>
+					</div>
+					{{ form.submit }}
+				</form>
+			</div>
+
+	<div><br><br>
+		<h2 class="title">Add New Flight</h2>
+			<div class='field is-grouped is-grouped-centered'>
+				<form method="POST" action="{{ url_for('main.staffHome') }}">
+				{{ form4.csrf_token }}
+					<div class="control has-icons-right"> 
+						<fieldset class="form-field">
+							{{ form4.airline_name.label }}
+							{{ form4.airline_name(size=20) }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.flight_num.label }}
+							{{ form4.flight_num }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.departure.label }}
+							{{ form4.departure }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.departure_time.label }}
+							{{ form4.departure_time }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.arrival.label }}
+							{{ form4.arrival }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.arrival_time.label }}
+							{{ form4.arrival_time }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.price.label }}
+							{{ form4.price}}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.status.label }}
+							{{ form4.status }}
+						</fieldset>
+					</div>
+					<div class="control has-icons-right">
+						<fieldset class="form-field">
+							{{ form4.airplane_id.label }}
+							{{ form4.airplane_id }}
+						</fieldset>
+					</div>
+					{{ form.submit }}
+				</form>
+			</div>
+	</div>
+
 </div>
 
 
