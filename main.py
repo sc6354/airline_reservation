@@ -205,6 +205,10 @@ def agentHome():
                                            average=ave_commission, x=top5_labels, y=top5_values, 
                                            x2=top5_com, y2=top_com)
 
+@login_required
+@main.route('/views', methods = ["GET"])
+def views():
+    return render_template('views.html')
 
 
 @main.route('/flights', methods=["POST", 'GET'])
