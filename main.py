@@ -22,12 +22,13 @@ def index():
         airport2 = aliased(airport, name = 'destination')
 
         all_flights = db.session.query(flight, airport1, airport2, airplane)\
-                                .outerjoin(airport1, airport1.airport_name == flight.departure_airport)\
+                                .join(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
                                 .join(airplane, airplane.airplane_id == flight.airplane_id)\
                                 .filter(flight.departure_time == date)\
                                 .filter(or_(airport1.airport_city == origin, airport1.airport_name == origin))\
-                                .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination)).all()
+                                .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination))\
+                                .all()
 
         if not all_flights:
             flash('Sorry, no flights found. Change your selection and try again.')
@@ -105,6 +106,7 @@ def staffHome():
                              seats= new_plane_form.seats.data)
         db.session.add(new_plane) 
         db.session.commit()
+        flash('New Plane Succefully Added.')
         return redirect(url_for('main.staffHome'))
 
     if airport_form.validate():
@@ -112,13 +114,16 @@ def staffHome():
                              airport_city = airport_form.airport_city.data)
         db.session.add(new_airport) 
         db.session.commit()
+        flash('New Airport Successfully Added.')
         return redirect(url_for('main.staffHome'))
 
     if status_form.validate():
         db.session.query(flight).filter(flight.flight_num == status_form.flight_num.data)\
                                 .update({flight.status: status_form.status.data})
         db.session.commit()
+        flash('Flight Status Succefully Updated.')
         return redirect(url_for('main.staffHome'))
+        
 
     if flight_form.validate():
         new_flight= flight(airline_name = flight_form.airline_name.data,
@@ -131,11 +136,10 @@ def staffHome():
                            status = flight_form.status.data,
                            airplane_id = flight_form.airplane_id.data)
         db.session.add(new_flight) 
+        db.session.flush()
         db.session.commit()
+        flash('New Flight Successfully Added.')
         return redirect(url_for('main.staffHome'))
-
-    
-
     
     return render_template('staffHome.html', form = new_plane_form, 
                                              form2 = airport_form,

@@ -57,7 +57,7 @@
               <td> {{ row.flight.arrival_time }} </td>
               <td> {{ row.airplane.seats}} </td>
               <td> {{ row.flight.price }} </td>
-              <td> 
+              <td colspan="{{ flights|length }}"> 
                 <form method="POST" action="/flights">
                    <div class="field">
                       <div class="control">

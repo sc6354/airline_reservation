@@ -1,5 +1,6 @@
-from wtforms import Form, StringField, DateTimeField, TextField, SubmitField, IntegerField
+from wtforms import Form, StringField, DateTimeField, DecimalField, TextField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length 
+from wtforms.fields.html5 import DateTimeLocalField
 
 class addNewPlane(Form):
     airline_name = StringField(
@@ -55,19 +56,21 @@ class addNewFlight(Form):
         'Departure Airport',
         [DataRequired()]
     )
-    departure_time = DateTimeField(
+    departure_time = DateTimeLocalField(
         'Departing Time',
-        [DataRequired()]
+        format='%m/%d/%y',
+        validators=[DataRequired()]
     )
     arrival = StringField(
         'Arrival Airport',
         [DataRequired()]
     )
-    arrival_time = DateTimeField(
+    arrival_time = DateTimeLocalField(
         'Arrival Time',
-        [DataRequired()]
+        format='%m/%d/%y',
+        validators=[DataRequired()]
     )
-    price = IntegerField(
+    price = DecimalField(
         'Price', 
         [DataRequired()]
     )
