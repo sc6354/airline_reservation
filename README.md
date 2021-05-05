@@ -1,2 +1,2 @@
-# airline_reservation_2
+# airline_reservation
  NYUSH Databases Spring 2021 final project
