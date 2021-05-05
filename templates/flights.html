@@ -59,6 +59,11 @@
               <td> {{ row.flight.price }} </td>
               <td> 
                 <form method="POST" action="/flights">
+                   <div class="field">
+                      <div class="control">
+                          <input class="input" name="customer_email" placeholder="Enter Email">
+                      </div>
+                  </div>
                   <div class="field">
                     <div class="control">
                         <input class="input" type='number' name="flight" placeholder="Enter Fight Number" autofocus="">

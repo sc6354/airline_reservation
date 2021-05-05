@@ -1,4 +1,4 @@
-{% extends 'base2.html' %}
+{% extends 'base3.html' %}
 
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
@@ -122,8 +122,6 @@
     <div class="content is-large">
             <h4> By Number Total Amount of Commission</h4>
             {% if x2 %}
-            {{ x2 }}
-            {{ y2 }}
                 <canvas id='topCom' width='1000' height='400'></canvas>
                 <script> 
                     var ctx = document.getElementById('topCom').getContext('2d');

@@ -3,11 +3,11 @@ from flask_login import login_required, current_user
 from . import db 
 from .models import flight, purchases, ticket, airport, airplane, ticket, purchases, customer, airplane, booking_agent
 from sqlalchemy.orm import aliased
-from sqlalchemy import extract
-from sqlalchemy import func
+from sqlalchemy import extract,func, or_
 from datetime import datetime, date, timedelta   
 import uuid
 import shortuuid
+
 from .forms import addNewPlane, addNewAirport, changeStatus, addNewFlight
 
 main = Blueprint('main', __name__)
@@ -22,15 +22,13 @@ def index():
         airport1 = aliased(airport, name ='origin')
         airport2 = aliased(airport, name = 'destination')
 
-        #payments = Payment.query.filter(extract('month', Payment.due_date) >= datetime.today().month,
-                #    extract('year', Payment.due_date) >= datetime.today().year,
-                    #            extract('day', Payment.due_date) >= datetime.today().day).all()
-
         all_flights = db.session.query(flight, airport1, airport2, airplane)\
                                 .outerjoin(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
                                 .join(airplane, airplane.airplane_id == flight.airplane_id)\
-                                .filter(flight.departure_time == date).all()
+                                .filter(flight.departure_time == date)\
+                                .filter(or_(airport1.airport_city == origin, airport1.airport_name == origin))\
+                                .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination)).all()
 
         if not all_flights:
             flash('Sorry, no flights found. Change your selection and try again.')
@@ -204,15 +202,24 @@ def agentHome():
 
 
 
-@main.route('/flights', methods=["POST"])
+@main.route('/flights', methods=["POST", 'GET'])
 def flights():
-    #id = uuid.uuid4()
+    curr_customer = customer.query.filter_by(email=current_user.username).first()
+    agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email==current_user.username).first()
+
     id = shortuuid.ShortUUID().random(length=20)
     airline = request.form.get('airline')
     flight = request.form.get('flight')
+    customer_email = request.form.get('customer_email')
+
     issued_ticket = ticket(ticket_id = id, airline_name = airline, flight_num = flight)
-    purchase = purchases(ticket_id = id, customer_email = current_user.username, purchase_date = date.today())
     db.session.add(issued_ticket)
+
+    if curr_customer:
+        purchase = purchases(ticket_id = id, customer_email = current_user.username, purchase_date = date.today())
+    else:
+        purchase = purchases(ticket_id = id, customer_email = customer_email, booking_agent_id = agent_id[0], purchase_date = date.today())
+   
     db.session.add(purchase)
     db.session.commit()
     return render_template('flights.html',)
