@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from . import db 
 from .models import *
 from sqlalchemy.orm import aliased
-from sqlalchemy import extract,func, or_, desc
+from sqlalchemy import extract,func, or_, desc, distinct
 from datetime import datetime, date, timedelta   
 import uuid
 import shortuuid
@@ -189,7 +189,22 @@ def moreFlights():
     return render_template('moreFlights.html')
 
 
+@main.route('/reports', methods=["POST", "GET"])
+@login_required
+def reports():
+    if request.method =='POST':
+        start = request.form.get('start')
+        end = request.form.get('end')
 
+        results = db.session.query(func.month(purchases.purchase_date),func.count(purchases.ticket_id))\
+                            .filter(purchases.purchase_date >= start)\
+                            .filter(purchases.purchase_date <= end)\
+                            .group_by(func.month(purchases.purchase_date)).all()
+        x = [row[0] for row in results]
+        y = [row[1] for row in results]
+
+        return render_template('reports.html', date=start, end_date =end, x= x, y=y)
+    return render_template('reports.html')
 
 
 @main.route('/agent_home',methods=["POST", "GET"])

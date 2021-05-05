@@ -1,0 +1,85 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+
+
+<div>
+	<br><br><br><br>
+	<div class="content is-large">
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div>
+            	<h4> {{ messages[0] }}</h4>
+            </div>
+		{% else %}
+			<h4> <strong>{{ airline }}</strong> Reports</h4>
+        {% endif %}
+    {% endwith %}
+	</div>
+</div>
+
+<div class="column is-4 is-offset-4">
+    <form method="POST" action="/reports">
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="start">
+            </div>
+        </div>
+        
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="end">
+            </div>
+        </div>
+
+        <div class="field is-grouped is-grouped-centered">
+            <p class="control is-expanded">
+                <button class="button is-info is-primary">Submit</button>
+            </p>
+            <p class="control">
+                <a href="{{ url_for('main.staffHome') }}" class="button is-light">Go Back</a>
+            </p>
+        </div>
+    </form>
+</div>
+
+
+
+<div class="content is-large">
+    {% if x %}
+        <br><br>
+        <div>
+            <h4> Monthly Ticket Sales</h4>
+            <h4> From {{ date }} to {{ end_date }} </h4>
+            <canvas id='barChart' width='1150' height='400'></canvas>
+            <script> 
+                var ctx = document.getElementById('barChart').getContext('2d');
+                var barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ x | safe }},
+                        datasets: [{
+                            label: "Total Tickets Sold",
+                            data: {{ y | safe }},
+                            borderWidth:1}]},
+                        options: {
+                            responsive:false,
+                            scales: {
+                                xAxes: [{scaleLabel: {display: true,labelString: 'Months' }}],
+                                yAxes: [{scaleLabel: {display: true,labelString: 'Number of Tickets' }}]
+                            }
+                        }
+                });
+            </script>
+        </div>
+    {% else %}
+        <br>
+        <h6> <strong> <i>Make Date Selection First to View Chart. </i></strong></h6>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}
