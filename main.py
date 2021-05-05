@@ -244,10 +244,17 @@ def views():
                             .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
                             .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
 
+    topAgentsByticketYear = db.session.query(purchases.booking_agent_id, booking_agent.email, func.count(purchases.booking_agent_id))\
+                            .filter(purchases.purchase_date <= date.today())\
+                            .filter(purchases.purchase_date >= time_limit)\
+                            .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
+                            .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
+
   
     return render_template('views.html', airline = airline[0], 
                                          frequent_flyers = top_flyers,
-                                         top_agents_past_month = topAgentsByticket30)
+                                         top_agents_past_month = topAgentsByticket30,
+                                         top_agents_year = topAgentsByticketYear )
 
 
 @main.route('/flights', methods=["POST", 'GET'])

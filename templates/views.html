@@ -56,17 +56,19 @@
             </div>
 		{% else %}
 			<h4> Top Agents</h4>
-			{{ top_agents_past_month }}
+			{{ top_agents_year }}
 
         {% endif %}
     {% endwith %}
 	</div>
 
 	<div class="table-container">
-		<p> <strong>By tickets sold in the past month </strong></p>
 		{% if top_agents_past_month %}
 		<table class="table is-fullwidth">
 			<thead>
+				<tr>
+					<th colspan="3"><strong><h3>By tickets sold in the past month </strong></th>
+				</tr>
 				<tr>
 					<th>Agent ID</th>
 					<th>Email</th>
@@ -86,6 +88,38 @@
 			</table>
 		{% endif %}
 	</div>
+
+	<br>
+
+
+	<div class="table-container">
+		{% if top_agents_year %}
+		<table class="table is-fullwidth">
+		
+			<thead>
+				<tr>
+					<th colspan="3"><strong><h3>By tickets sold in the past year </strong></th>
+				</tr>
+				<tr>
+					<th>Agent ID</th>
+					<th>Email</th>
+					<th>Number of Tickets Sold</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in top_agents_year %}
+				<tr> 
+					<td> {{ row.booking_agent_id }} </td>
+					<td> {{ row.email }} </td>
+					<td> {{ row[2] }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
+</div>
+
 </div>
 
 
