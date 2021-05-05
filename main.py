@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, session, request, flash, redirect, url_for, make_response
 from flask_login import login_required, current_user
 from . import db 
-from .models import flight, purchases, ticket, airport, airplane, ticket, purchases, customer, airplane
+from .models import flight, purchases, ticket, airport, airplane, ticket, purchases, customer, airplane, booking_agent
 from sqlalchemy.orm import aliased
 from sqlalchemy import extract
 from sqlalchemy import func
@@ -147,7 +147,26 @@ def staffHome():
 @main.route('/agent_home',methods=["POST", "GET"])
 @login_required
 def agentHome():
-    return render_template('agentHome.html')
+    
+    today_date = date.today()
+    email = "%{0}%".format(current_user.username)
+    airport1 = aliased(airport, name ='origin')
+    airport2 = aliased(airport, name = 'destination')
+
+    fname = db.session.query(booking_agent).filter(booking_agent.email.like(email)).first()
+    agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email.like(email)).first()
+
+    upcoming_flights = db.session.query(purchases, customer, ticket, flight, airport1, airport2)\
+            .filter(purchases.booking_agent_id== agent_id[0])\
+            .join(customer, customer.email == purchases.customer_email)\
+            .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+            .join(flight, flight.flight_num == ticket.flight_num)\
+            .outerjoin(airport1, airport1.airport_name == flight.departure_airport)\
+            .join(airport2, airport2.airport_name == flight.arrival_airport)\
+            .filter(flight.departure_time >= today_date).all()
+
+    return render_template('agentHome.html', name = fname, email = current_user.username, 
+                                           all_upcoming_flights = upcoming_flights)
 
 
 

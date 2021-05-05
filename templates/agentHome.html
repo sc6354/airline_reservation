@@ -4,23 +4,64 @@
 
 <div class="content is-large">
 	<h1 class='is-family-monospace-danger'>
-		Welcome, !
+		Welcome, {{ name.email }} !
 
 	</h1>
 </div>
 
-<br><br><br><br>
-<div class="content is-large">
-{% with messages = get_flashed_messages() %}
-	{% if messages %}
-		<div>
-			<h4> No upcoming flights. </h4>
-		</div>
-	{% else %}
-		<h4> </h4>
-	{% endif %}
-{% endwith %}
+<div>
+	<br><br><br><br>
+	<div class="content is-large">
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div>
+            	<h4> {{ messages[0] }} Click <a href="{{ url_for('main.index') }}"><i> here</i></a> to search for flights. </h4>
+            </div>
+		{% else %}
+			<h4> Here are upcoming flights for your clients</h4>
+            {{ all_upcoming_flights }}
+        {% endif %}
+    {% endwith %}
+	</div>
+
+	<div class="table-container">
+		{% if all_upcoming_flights %}
+		<table class="table is-fullwidth">
+			<thead>
+				<tr>
+				    <th>Client Name</th>
+					<th>Ticket Id</th>
+					<th>Airline </th>
+					<th>Flight Number</th>
+					<th>Route</th>
+					<th>Origin</th>
+					<th>Destination</th>
+					<th>Departing Time</th>
+					<th>Arrival Time</th>
+					<th>Status</th>
+				</tr>
+			</thred>
+			<tbody>
+				{% for row in all_upcoming_flights %}
+				<tr> 
+				    <td> {{ row.customer.name }} </td>
+					<td> {{ row.ticket.ticket_id}} </td>
+					<td> {{ row.flight.airline_name}} </td>
+					<td> {{ row.flight.flight_num }} </td>
+					<td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+					<td> {{ row.origin.airport_city}} </td>
+					<td> {{ row.destination.airport_city}} </td>
+					<td> {{ row.flight.departure_time }} </td>
+					<td> {{ row.flight.arrival_time }} </td>
+					<td> {{ row.flight.status }} </td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+	</div>
 </div>
+
 
 
 
