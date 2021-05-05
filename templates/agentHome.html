@@ -1,0 +1,30 @@
+{% extends 'base2.html' %}
+
+{% block content %}
+
+<div class="content is-large">
+	<h1 class='is-family-monospace-danger'>
+		Welcome, !
+
+	</h1>
+</div>
+
+<br><br><br><br>
+<div class="content is-large">
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		<div>
+			<h4> No upcoming flights. </h4>
+		</div>
+	{% else %}
+		<h4> </h4>
+	{% endif %}
+{% endwith %}
+</div>
+
+
+
+
+
+<br><br><br>
+{% endblock %}

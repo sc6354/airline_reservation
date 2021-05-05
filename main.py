@@ -143,6 +143,14 @@ def staffHome():
                                              form3 = status_form,
                                              form4 = flight_form)
 
+
+@main.route('/staff_home',methods=["POST", "GET"])
+@login_required
+def agentHome():
+    return render_template('agentHome.html')
+
+
+
 @main.route('/flights', methods=["POST"])
 def flights():
     #id = uuid.uuid4()
