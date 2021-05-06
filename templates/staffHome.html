@@ -14,8 +14,8 @@
 	<div class="content is-large">
 	{% with messages = get_flashed_messages() %}
 		{% if messages %}
-			<div>
-				<h4> {{ messages[0] }}</h4>
+			<div class="notification is-info column is-4 is-offset-4">
+				{{ messages[0] }}
 			</div>
 		{% else %}
 			<h4> Here are upcoming flights for your airline, <strong><em>{{ airline }}</em></strong> </h4>

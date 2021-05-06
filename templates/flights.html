@@ -1,20 +1,23 @@
-{% extends "base.html" %}
+{% if agent %}
+  {% extends "base3.html" %}
+{% else %}  
+  {% extends "base.html" %}
+{% endif%}
 
 {% block content %}
 
-<div class="notification is-danger">
-  <button class="delete"></button>
-  We’re here for you.
-  It’s important to us that you get the help you need during these rapidly changing times. 
-  <strong>Right now</strong>, there are multiple travel waivers in place. 
-  If you want to change, cancel or rebook your flight, you can do so right in your <a href="{{ url_for('main.profile') }}">account</a>.
-</div>
-
-
+{% if not agent %}
+  <div class="notification is-danger">
+    <button class="delete"></button>
+    We’re here for you.
+    It’s important to us that you get the help you need during these rapidly changing times. 
+    <strong>Right now</strong>, there are multiple travel waivers in place. 
+    If you want to change, cancel or rebook your flight, you can do so right in your <a href="{{ url_for('main.profile') }}">account</a>.
+  </div>
+{% endif %}
 
 <div class="column is-4 is-offset-4">
     <h1 class="title">Available Flights</h1>
-    {{ flights }}
 </div>
 
 
@@ -39,9 +42,8 @@
             <th>Route </th>
             <th>Departing Time</th>
             <th>Arrival Time</th>
-            <th>Available Seats </th>
             <th>Price</th>
-            <th>Purchase Flight </th>
+            <th>Enter Flight Info. to Purchase</th>
         </tr>
       </thred>
       <tbody>
@@ -55,7 +57,6 @@
               <td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
               <td> {{ row.flight.departure_time }} </td>
               <td> {{ row.flight.arrival_time }} </td>
-              <td> {{ row.airplane.seats}} </td>
               <td> {{ row.flight.price }} </td>
               <td colspan="{{ flights|length }}"> 
                 <form method="POST" action="/flights">

@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <div>
-	<br><br><br><br>
+	<br>
 	<div class="content is-large">
 	{% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	<br><br>
 	<div class="content is-large">
 		<h4> Places you visited</h4>
-		{{ all_past_flights }}
 	</div>
 	<div class="table-container">
 		{% if all_past_flights %}
