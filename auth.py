@@ -100,8 +100,10 @@ def agentSignup():
             elif(agent):
                 error = 'Agent email address {} is already registered. Go to the login page.'.format(email)
             else:
-                new_agent = booking_agent(email = email, password = generate_password_hash(pw, method='sha256'), booking_agent_id = id)
+                new_agent = booking_agent(email = email, password = generate_password_hash(pw, method='sha256'), booking_agent_id = agent_id)
+                new_user = users(username = email, password = generate_password_hash(pw, method='sha256'))
                 db.session.add(new_agent)
+                db.session.add(new_user)
                 db.session.commit()
                 return redirect(url_for('main.index'))
                 
@@ -134,7 +136,7 @@ def staffSignup():
             db.session.add(new_staff)
             db.session.add(new_user)
             db.session.commit()
-            return redirect(url_for('main.staff_home'))
+            return redirect(url_for('main.staffHome'))
                     
         flash(error)
     return render_template('staffSignup.html')

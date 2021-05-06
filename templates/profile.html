@@ -118,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				{% endfor %}
 			</tbody>
 			</table>
+		{% else %}
+			<h6> <strong> <i> You have no past trips. </i></strong></h6>
 		{% endif %}
 	</div>
 </div>
@@ -126,11 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
 <div>
 	<br><br>
 	<div class="content is-large">
-		<h4> Your Spending History</h4>
+		<h4>Your Spending History </h4>
+		Total amount spent in past year: ${{ all_spending }}
+
+		<br><br>
+	
+		<h5> In past 6 months</h5>
 			{% if x %}
-			{{ all_spending }}
-			{{ x }} 
-			{{ y }}
 				<canvas id='barChart' width='1150' height='400'></canvas>
 				<script> 
 					var ctx = document.getElementById('barChart').getContext('2d');
@@ -143,7 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
 								data: {{ y | safe }},
 								borderWidth:1}]},
 							options: {
-								responsive:false
+								responsive:false,
+								scales: {
+                                xAxes: [{scaleLabel: {display: true,labelString: 'Months' }}],
+                                yAxes: [{scaleLabel: {display: true,labelString: 'Spending Amount ($)' }}]
+                            }
 							}
 					});
 				</script>
@@ -152,5 +160,66 @@ document.addEventListener('DOMContentLoaded', () => {
 		{% endif %}
 	</div>	
 </div>
+
+<div>
+	<br><br>
+	<div class="content is-large">
+		<h4> <strong>{{ airline }}</strong> Selective Spending History </h4>
+	</div>
+</div>
+
+<div class="column is-4 is-offset-4">
+    <form method="POST" action="/profile">
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="start">
+            </div>
+        </div>
+        
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="end">
+            </div>
+        </div>
+
+        <div class="field is-grouped is-grouped-centered">
+            <p class="control is-expanded">
+                <button class="button is-info is-primary">Submit</button>
+            </p>
+        </div>
+    </form>
+</div>
+
+<div class="content is-large">
+    {% if x2 %}
+        <br><br>
+        <div>
+            <h4> Monthly Spending from {{ date }} to {{ end_date }} </h4>
+            <canvas id='selectedSpendingBar' width='1150' height='400'></canvas>
+            <script> 
+                var ctx = document.getElementById('selectedSpendingBar').getContext('2d');
+                var barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ x2 | safe }},
+                        datasets: [{
+                            label: "Total Amount Spent",
+                            data: {{ y2 | safe }},
+                            borderWidth:1}]},
+                        options: {
+                            responsive:false,
+                            scales: {
+                                xAxes: [{scaleLabel: {display: true,labelString: 'Months' }}],
+                                yAxes: [{scaleLabel: {display: true,labelString: 'Spending Amount ($)' }}]
+                            }
+                        }
+                });
+            </script>
+        </div>
+    {% else %}
+        <br>
+        <h6> <strong> <i>Make Date Selection First to View Spending Chart. </i></strong></h6>
+    {% endif %}
+
 	    
 {% endblock %}

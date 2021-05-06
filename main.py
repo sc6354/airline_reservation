@@ -21,7 +21,6 @@ airport2 = aliased(airport, name = 'destination')
 
 @main.route('/', methods=["POST", 'GET'])
 def index():
-    agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email==current_user.username).first()
     if request.method == 'POST':
         origin = request.form.get('departure').upper()
         destination = request.form.get('destination').upper()
@@ -35,25 +34,29 @@ def index():
                                 .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination))\
                                 .all()
 
-        if not all_flights:
-            flash('Sorry, no flights found. Change your selection and try again.')
-            return (redirect(url_for('main.index', agent = agent_id)))
+        if current_user.is_anonymous:
+            if not all_flights:
+                flash('Sorry, no flights found. Change your selection and try again.')
+                return (redirect(url_for('main.index')))
+            else:
+                return render_template('flights.html', flights = all_flights)
         else:
-            return render_template('flights.html', flights = all_flights, agent=agent_id)
+            agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email==current_user.username).first()
+            if not all_flights:
+                flash('Sorry, no flights found. Change your selection and try again.')
+                return (redirect(url_for('main.index', agent = agent_id)))
+            else:
+                return render_template('flights.html', flights = all_flights, agent=agent_id)
         
-    return render_template('index.html', agent=agent_id)
+    return render_template('index.html')
 
 
-@main.route('/profile')
+@main.route('/profile', methods=["POST", "GET"])
 @login_required
 #@roles_required('Customer')
 def profile():
-    
     today_date = date.today()
     email = "%{0}%".format(current_user.username)
-    airport1 = aliased(airport, name ='origin')
-    airport2 = aliased(airport, name = 'destination')
-
     fname = db.session.query(customer).filter(customer.email.like(email)).first()
 
     upcoming_flights = db.session.query(purchases, flight, ticket, airport1, airport2)\
@@ -62,7 +65,7 @@ def profile():
             .join(flight, flight.flight_num == ticket.flight_num)\
             .outerjoin(airport1, airport1.airport_name == flight.departure_airport)\
             .join(airport2, airport2.airport_name == flight.arrival_airport)\
-            .filter(flight.departure_time >= today_date)\
+            .filter(func.date(flight.departure_time) >= today_date)\
             .order_by(asc(flight.departure_time)).all()
 
     past_flights = db.session.query(purchases, flight, ticket, airport1, airport2)\
@@ -71,7 +74,7 @@ def profile():
             .join(flight, flight.flight_num == ticket.flight_num)\
             .outerjoin(airport1, airport1.airport_name == flight.departure_airport)\
             .join(airport2, airport2.airport_name == flight.arrival_airport)\
-            .filter(flight.departure_time <= today_date)\
+            .filter(func.date(flight.departure_time) <= today_date)\
             .order_by(desc(flight.departure_time)).all()
 
     # need flight, ticket, and purchases
@@ -92,10 +95,34 @@ def profile():
     if not upcoming_flights:
         flash('Looks like you have no planned trips.')
     
+    if request.method =='POST':
+        start = request.form.get('start')
+        end = request.form.get('end')
+
+        #selective spending history 
+        spending2 = db.session.query(func.month(purchases.purchase_date), func.sum(flight.price).label('monthly_total'))\
+                          .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                          .join(flight, flight.flight_num == ticket.flight_num)\
+                          .filter(purchases.customer_email.like(email))\
+                          .filter(purchases.purchase_date >= start)\
+                          .filter(purchases.purchase_date <= end)\
+                          .group_by(func.month(purchases.purchase_date)).all()
+
+        labels2 = [row[0] for row in spending2]
+        values2 = [float(row[1]) for row in spending2]
+
+        return render_template('profile.html', name = fname, email = current_user.username, 
+                                           all_upcoming_flights = upcoming_flights, 
+                                           all_past_flights = past_flights, 
+                                           all_spending = spending[0][0], x =labels, y =values,
+                                           x2=labels2, y2=values2, date=start, end_date=end)
+
+    
     return render_template('profile.html', name = fname, email = current_user.username, 
                                            all_upcoming_flights = upcoming_flights, 
                                            all_past_flights = past_flights, 
                                            all_spending = spending[0][0], x =labels, y =values)
+    
 
 
 @main.route('/staff_home',methods=["POST", "GET"])
@@ -114,7 +141,9 @@ def staffHome():
                                 .join(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
                                 .filter(flight.departure_time >= date.today())\
-                                .filter(flight.departure_time <= time_limit).all()
+                                .filter(flight.departure_time <= time_limit)\
+                                .filter(flight.airline_name == airline[0])\
+                                .order_by(asc(flight.departure_time)).all()
 
 
     if new_plane_form.validate():
@@ -135,13 +164,19 @@ def staffHome():
         return redirect(url_for('main.staffHome'))
 
     if status_form.validate():
-        db.session.query(flight).filter(flight.flight_num == status_form.flight_num.data)\
-                                .update({flight.status: status_form.status.data})
-        db.session.commit()
-        flash('Flight Status Succefully Updated.')
-        return redirect(url_for('main.staffHome'))
-        
-
+        entered_flight = db.session.query(flight)\
+                           .filter(flight.flight_num == status_form.flight_num.data)\
+                           .filter(flight.airline_name == airline[0]).first()
+        if not entered_flight:
+            flash('No flight found. Please add flight first.')
+            return redirect(url_for('main.staffHome'))
+        else: 
+            db.session.query(flight).filter(flight.flight_num == status_form.flight_num.data)\
+                                    .update({flight.status: status_form.status.data})
+            db.session.commit()
+            flash('Flight Status Succefully Updated.')
+            return redirect(url_for('main.staffHome'))
+    
     if flight_form.validate():
         new_flight= flight(airline_name = flight_form.airline_name.data,
                            flight_num = flight_form.flight_num.data,
@@ -423,7 +458,7 @@ def views():
 
 @main.route('/flights', methods=["POST", 'GET'])
 def flights():
-    id = shortuuid.ShortUUID().random(length=20)
+    id = shortuuid.ShortUUID().random(length=11)
     airline = request.form.get('airline')
     flight = request.form.get('flight')
     customer_email = request.form.get('customer_email')

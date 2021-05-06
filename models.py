@@ -17,12 +17,8 @@ class users(UserMixin, db.Model):
     username = db.Column(db.String(100))
     password = db.Column(db.String(100))
 
-
 class booking_agent(UserMixin, db.Model):
     __table_args__ = {'extend_existing': True} 
-    def get_id(self):
-           return (self.booking_agent_id)
-    #id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
     email = db.Column(db.String(100), primary_key=True)
     password = db.Column(db.String(100))
     booking_agent_id = db.Column(db.Integer, unique=True)
