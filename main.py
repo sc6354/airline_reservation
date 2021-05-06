@@ -471,29 +471,34 @@ def views():
 ########## Customer and Agent Purchase Flight Page ########## 
 @main.route('/flights', methods=["POST", 'GET'])
 def flights():
-    id = shortuuid.ShortUUID().random(length=11)
-    airline = request.form.get('airline')
-    flight = request.form.get('flight')
-    customer_email = request.form.get('customer_email')
+    if request.method == 'POST':
+        if current_user.is_anonymous:
+            flash('Sorry, you must login to purchase flight')
+            return (redirect(url_for('auth.login')))
+        else:          
+            id = shortuuid.ShortUUID().random(length=11)
+            airline = request.form.get('airline')
+            flight = request.form.get('flight')
+            customer_email = request.form.get('customer_email')
 
-    curr_customer = customer.query.filter_by(email=customer_email).first()
-    agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email==current_user.username).first()
+            curr_customer = customer.query.filter_by(email=customer_email).first()
+            agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email==current_user.username).first()
 
-    issued_ticket = ticket(ticket_id = id, airline_name = airline, flight_num = flight)
-    db.session.add(issued_ticket)
-    db.session.flush()
+            issued_ticket = ticket(ticket_id = id, airline_name = airline, flight_num = flight)
+            db.session.add(issued_ticket)
+            db.session.flush()
 
-    if curr_customer:
-        purchase = purchases(purchase_date = date.today())
-        purchase.ticket_id = issued_ticket.ticket_id
-        purchase.customer_email = curr_customer.email
-        #purchase = purchases(ticket_id = id, customer_email = current_user.username, purchase_date = date.today())
-    else:
-        purchase = purchases(booking_agent_id = agent_id[0], purchase_date = date.today())
-        purchase.ticket_id = issued_ticket.ticket_id
-        purchase.customer_email = customer_email  
-   
-    db.session.add(purchase)
-    db.session.commit()
-    return render_template('index.html', agent=agent_id )
+            if curr_customer:
+                purchase = purchases(purchase_date = date.today())
+                purchase.ticket_id = issued_ticket.ticket_id
+                purchase.customer_email = curr_customer.email
+            else:
+                purchase = purchases(booking_agent_id = agent_id[0], purchase_date = date.today())
+                purchase.ticket_id = issued_ticket.ticket_id
+                purchase.customer_email = customer_email  
+
+            db.session.add(purchase)
+            db.session.commit()
+        return render_template('index.html', agent=agent_id )
+    return render_template('index.html')
 
