@@ -6,8 +6,6 @@
 	<br><br><br><br>
 	<div class="content is-large">
 		<h4> Enter information to view Flights</h4>
-        {{ more_flights }}
-        {{ airline}}
 	</div>
 </div>
 
@@ -54,7 +52,11 @@
 
 
 {% if more_flights %}
+    <br><br>
     <div class="table-container">
+    <div class="notification is-info column is-4 is-offset-4">
+          Flights from {{ start }} to {{ end}}.
+    </div>
     <table class="table is-fullwidth">
         <thead>
             <tr>

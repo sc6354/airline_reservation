@@ -174,19 +174,22 @@ def moreFlights():
         destination = request.form.get('destination').upper()
         
         airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
+
         flightsInDateRange = db.session.query(flight, airport1, airport2, airplane)\
-                                       .join(flight, flight.departure_airport == airport1.airport_name)\
+                                       .join(airport1, airport1.airport_name == flight.departure_airport)\
                                        .join(airport2, airport2.airport_name == flight.arrival_airport)\
+                                       .join(airplane, airplane.airplane_id == flight.airplane_id)\
                                        .filter(flight.departure_time >= start)\
                                        .filter(flight.departure_time <= end)\
-                                       .filter(airport1.airport_city == origin)\
-                                       .filter(airport2.airport_city == destination)\
+                                       .filter(or_(airport1.airport_city == origin, airport1.airport_name == origin))\
+                                       .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination))\
                                        .filter(flight.airline_name == airline[0]).distinct(flight.flight_num).all()
+                                      
         if not flightsInDateRange:
             flash(airline[0] + ' has no flights for this period and route.')
             return (redirect(url_for('main.moreFlights')))
         else:
-            return render_template('moreFlights.html', more_flights=flightsInDateRange)
+            return render_template('moreFlights.html', start=start, end=end, more_flights=flightsInDateRange)
 
     return render_template('moreFlights.html')
 
