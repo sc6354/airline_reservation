@@ -11,6 +11,11 @@ from .forms import *
 
 main = Blueprint('main', __name__)
 
+today_date = date.today()
+past_month = date.today() - timedelta(days=30)
+past6months = date.today() - timedelta(days=180)
+past_year = date.today() - timedelta(days=365)
+
 @main.route('/', methods=["POST", 'GET'])
 def index():
     if request.method == 'POST':
@@ -191,10 +196,40 @@ def moreFlights():
 @main.route('/reports', methods=["POST", "GET"])
 @login_required
 def reports():
+    #revenue breakdown in past month
+    #not null means there an id in the agent coloumn of the purchase table
+    indirect_revenue_month = db.session.query(purchases, func.sum(flight.price))\
+                                .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                .join(flight, flight.flight_num == ticket.flight_num)\
+                                .filter(purchases.purchase_date >= past_month)\
+                                .filter(purchases.booking_agent_id.isnot(None)).all()
+
+    direct_revenue_month = db.session.query(purchases, func.sum(flight.price))\
+                                .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                .join(flight, flight.flight_num == ticket.flight_num)\
+                                .filter(purchases.purchase_date >= past_month)\
+                                .filter(purchases.booking_agent_id.is_(None)).all()
+
+    indirect_revenue_year = db.session.query(purchases, func.sum(flight.price))\
+                                .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                .join(flight, flight.flight_num == ticket.flight_num)\
+                                .filter(purchases.purchase_date >= past_year)\
+                                .filter(purchases.booking_agent_id.isnot(None)).all()
+
+    direct_revenue_year = db.session.query(purchases, func.sum(flight.price))\
+                                .join(ticket, ticket.ticket_id == purchases.ticket_id)\
+                                .join(flight, flight.flight_num == ticket.flight_num)\
+                                .filter(purchases.purchase_date >= past_year)\
+                                .filter(purchases.booking_agent_id.is_(None)).all()
+    month_data = [float(direct_revenue_month[0][1]), float(indirect_revenue_month[0][1])]
+    year_data = [float(direct_revenue_year[0][1]), float(indirect_revenue_year[0][1])]
+    labels = ['Direct Sale', 'Indirect Sales']
+
     if request.method =='POST':
         start = request.form.get('start')
         end = request.form.get('end')
 
+        #monthly ticket sale
         results = db.session.query(func.month(purchases.purchase_date),func.count(purchases.ticket_id))\
                             .filter(purchases.purchase_date >= start)\
                             .filter(purchases.purchase_date <= end)\
@@ -202,8 +237,10 @@ def reports():
         x = [row[0] for row in results]
         y = [row[1] for row in results]
 
-        return render_template('reports.html', date=start, end_date =end, x= x, y=y)
-    return render_template('reports.html')
+        return render_template('reports.html', date=start, end_date =end, x= x, y=y,
+                               month=month_data, labels=labels, year=year_data)
+
+    return render_template('reports.html', month=month_data, labels=labels, year=year_data)
 
 
 @main.route('/agent_home',methods=["POST", "GET"])
@@ -241,6 +278,7 @@ def agentHome():
     ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                         .filter(purchases.purchase_date >= past_month)\
                          .filter(purchases.booking_agent_id == agent_id[0]).all()
 
     num_of_tickets = int(ticket_query[0][0])
@@ -265,6 +303,39 @@ def agentHome():
 
     top5_com = [row[0] for row in top5bycommission]
     top_com = [.1*float(row[1]) for row in top5bycommission]
+
+    ##selective commission days
+    if request.method =='POST':
+        start = request.form.get('agent_start')
+        end = request.form.get('agent_end')
+
+        results = flight.query.with_entities(func.sum(flight.price).label('total sale'))\
+                        .join(ticket, ticket.flight_num == flight.flight_num)\
+                        .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                        .filter(purchases.purchase_date >= start)\
+                        .filter(purchases.purchase_date <= end)\
+                        .filter(purchases.booking_agent_id == agent_id[0])\
+                        .order_by(desc('total sale')).all()
+        
+        ticket_results = flight.query.with_entities(func.count(flight.flight_num))\
+                                     .join(ticket, ticket.flight_num == flight.flight_num)\
+                                     .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                                     .filter(purchases.purchase_date >= start)\
+                                     .filter(purchases.purchase_date <= end)\
+                                     .filter(purchases.booking_agent_id == agent_id[0]).all()
+        if results is not None:
+            selected_commission = .1*float(results[0][0])
+            t = int(ticket_results[0][0])
+            selected_ave_commission = round(selected_commission/t, 2)
+        else:
+            selected_commission =0
+            t = 0
+            selected_ave_commission =0
+        return render_template('agentHome.html',name = fname, email = current_user.username, 
+                                all_upcoming_flights = upcoming_flights,all_commission = commission, 
+                                num_of_tickets_sold=num_of_tickets, average=ave_commission,
+                                x=top5_labels, y=top5_values, x2=top5_com, y2=top_com,start=start, end=end,
+                                selected_com= selected_commission, selected_ave=selected_ave_commission,selected_tic=t)
 
 
     return render_template('agentHome.html', name = fname, email = current_user.username, 

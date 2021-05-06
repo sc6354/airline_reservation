@@ -8,15 +8,7 @@
 <div>
 	<br><br><br><br>
 	<div class="content is-large">
-	{% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div>
-            	<h4> {{ messages[0] }}</h4>
-            </div>
-		{% else %}
-			<h4> <strong>{{ airline }}</strong> Reports</h4>
-        {% endif %}
-    {% endwith %}
+		<h4> <strong>{{ airline }}</strong> Reports</h4>
 	</div>
 </div>
 
@@ -78,6 +70,51 @@
         <br>
         <h6> <strong> <i>Make Date Selection First to View Chart. </i></strong></h6>
     {% endif %}
+</div>
+
+
+<div>
+	<br><br><br><br>
+	<div class="content is-large">
+		<h4> <strong>{{ airline }}</strong> Revenue Breakdown</h4>
+	</div>
+
+    <div class="content is-large">
+        <h4> Past Month </h4>
+        <canvas id='month_pie' width='1200' height='400'></canvas>
+        <script> 
+            var ctx = document.getElementById('month_pie').getContext('2d');
+            var barChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: {{ labels | safe }},
+                    datasets: [{
+                        label: "Past 6 Months",
+                        data: {{ month | safe }},
+                    backgroundColor: ['rgb(54, 162, 235)','rgb(255, 99, 132)'],
+                    hoverOffset: 4 }]
+            }});
+        </script>
+    </div>
+    <br><br>
+
+    <div class="content is-large">
+        <h4> Past Year</h4>
+        <canvas id='year_pie' width='1200' height='400'></canvas>
+        <script> 
+            var ctx = document.getElementById('year_pie').getContext('2d');
+            var barChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: {{ labels | safe }},
+                    datasets: [{
+                        label: "Past 6 Months",
+                        data: {{ year | safe }},
+                    backgroundColor: ['rgb(54, 162, 235)','rgb(255, 99, 132)'],
+                    hoverOffset: 4 }]
+            }});
+        </script>
+    </div>
 </div>
 
 

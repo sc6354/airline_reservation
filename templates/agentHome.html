@@ -75,7 +75,51 @@
         <li> Average Commission: ${{ average }} </li>
     </ul>
 	</h1>
+
+    <br>
+
+    <div class="content is-large">
+    <h4> Selective Days Commission History </h4>
+    </div>
+    {% if selected_com %}
+        <h1 class='is-family-monospace-danger'>
+        <h1> Commission from {{start}} to {{ end }}: </h1>
+        <ul>
+            <li> Total Commisssion: ${{ selected_com }} </li>
+            <li> Totol Number of Tickets Sold:  {{ selected_tic}}</li>
+            <li> Average Commission: ${{ selected_ave }} </li>
+        </ul>
+        </h1>
+    {% else %}
+        <h1> Make a selection first.</h2>
+    {% endif %}
+
+    <div class="column is-4 is-offset-4">
+        <form method="POST" action="/agent_home">
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="date" name="agent_start">
+                </div>
+            </div>
+            
+            <div class="field">
+                <div class="control">
+                    <input class="input" type="date" name="agent_end">
+                </div>
+            </div>
+
+            <div class="field is-grouped is-grouped-centered">
+                <p class="control is-expanded">
+                    <button class="button is-info is-primary">Submit</button>
+                </p>
+            </div>
+        </form>
+    </div>
 </div>
+
+
+
+
 
 <div>
     <br><br><br>
