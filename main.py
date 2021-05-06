@@ -80,8 +80,7 @@ def profile():
                           .group_by(func.month(purchases.purchase_date)).all()
 
     labels = [row[0] for row in spending1]
-    values = [row[1] for row in spending1]
-
+    values = [float(row[1]) for row in spending1]
     
     if not upcoming_flights:
         flash('Looks like you have no planned trips.')

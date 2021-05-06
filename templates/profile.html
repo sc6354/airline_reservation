@@ -80,9 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
 <div>
-<br><br>
+	<br><br>
 	<div class="content is-large">
 		<h4> Places you visited</h4>
+		{{ all_past_flights }}
 	</div>
 	<div class="table-container">
 		{% if all_past_flights %}
@@ -123,39 +124,34 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 
-<br><br>
+<div>
+	<br><br>
 	<div class="content is-large">
 		<h4> Your Spending History</h4>
-		{% if all_spending %}
+			{% if x %}
 			{{ all_spending }}
 			{{ x }} 
 			{{ y }}
-		<input type="range" class="slider" value="5" min="30" max="50" id="points">
-
-		<canvas id='barChart' width='1150' height='400'></canvas>
-		<script> 
-			var ctx = document.getElementById('barChart').getContext('2d');
-			var barChart = new Chart(ctx, {
-				type: 'bar',
-				data: {
-					labels: {{ x | safe }},
-					datasets: [{
-						label: "Spending History",
-						data: {{ y | safe }},
-						borderWidth:1}]},
-					options: {
-						responsive:false
-					}
-			});
-		</script>
-
-
+				<canvas id='barChart' width='1150' height='400'></canvas>
+				<script> 
+					var ctx = document.getElementById('barChart').getContext('2d');
+					var barChart = new Chart(ctx, {
+						type: 'bar',
+						data: {
+							labels: {{ x | safe }},
+							datasets: [{
+								label: "Spending History",
+								data: {{ y | safe }},
+								borderWidth:1}]},
+							options: {
+								responsive:false
+							}
+					});
+				</script>
 		{% else %}
 			<h6> <strong>You have no spending history. </strong></h6>
 		{% endif %}
-		
-	</div>
-	
+	</div>	
 </div>
 	    
 {% endblock %}
