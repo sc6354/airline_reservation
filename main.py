@@ -85,7 +85,7 @@ def profile():
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
                          .filter(purchases.customer_email.like(email))\
-                         .filter(func.date(flight.departure_time)<= past_year).all()
+                         .filter(func.date(purchases.purchase_date)<= past_year).all()
     
     # query monthly spending 
     spending1 = db.session.query(func.month(purchases.purchase_date), func.sum(flight.price).label('monthly_total'))\
