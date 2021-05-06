@@ -25,10 +25,6 @@ def index():
         origin = request.form.get('departure').upper()
         destination = request.form.get('destination').upper()
         date = request.form.get('date')
-
-        #airport1 = aliased(airport, name ='origin')
-        #airport2 = aliased(airport, name = 'destination')
-
         all_flights = db.session.query(flight, airport1, airport2, airplane)\
                                 .join(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
@@ -110,9 +106,7 @@ def staffHome():
     time_limit = date.today() + timedelta(days=30)
     staff_name = db.session.query(airline_staff.first_name).filter(airline_staff.username==current_user.username).first()
     airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
-    airport1 = aliased(airport, name ='origin')
-    airport2 = aliased(airport, name = 'destination')
-
+    
     flightsIn30Days = db.session.query(flight, airport1, airport2)\
                                 .join(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
@@ -173,9 +167,6 @@ def staffHome():
 @main.route('/more_flights', methods = ["POST", 'GET'])
 @login_required
 def moreFlights():
-    #airport1 = aliased(airport, name ='origin')
-    #airport2 = aliased(airport, name = 'destination')
-        
     if request.method =='POST':
         start = request.form.get('start')
         end = request.form.get('end')
@@ -184,15 +175,19 @@ def moreFlights():
         
         airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
         flightsInDateRange = db.session.query(flight, airport1, airport2, airplane)\
-                                       .join(airport1, airport1.airport_name == flight.departure_airport)\
+                                       .join(flight, flight.departure_airport == airport1.airport_name)\
                                        .join(airport2, airport2.airport_name == flight.arrival_airport)\
                                        .filter(flight.departure_time >= start)\
                                        .filter(flight.departure_time <= end)\
                                        .filter(airport1.airport_city == origin)\
                                        .filter(airport2.airport_city == destination)\
-                                       .filter(flight.airline_name == airline[0]).all()
+                                       .filter(flight.airline_name == airline[0]).distinct(flight.flight_num).all()
+        if not flightsInDateRange:
+            flash(airline[0] + ' has no flights for this period and route.')
+            return (redirect(url_for('main.moreFlights')))
+        else:
+            return render_template('moreFlights.html', more_flights=flightsInDateRange)
 
-        return render_template('moreFlights.html', more_flights=flightsInDateRange, airline=airline[0])
     return render_template('moreFlights.html')
 
 

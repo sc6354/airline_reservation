@@ -11,6 +11,14 @@
 	</div>
 </div>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+      <div class="notification is-danger column is-4 is-offset-4">
+          {{ messages[0] }}
+      </div>
+  {% endif %}
+{% endwith %}
+
 <div class="column is-4 is-offset-4">
     <form method="POST" action='/more_flights'>
         <div class="field">
@@ -81,8 +89,5 @@
         </table>
     </div>
 {% endif %}
-
-
-
 
 {% endblock %}
