@@ -66,7 +66,7 @@
 <div>
     <br><br><br>
     <div class="content is-large">
-        <h4> Commission History </h4>
+        <h4> Past 30 Days Commission History </h4>
     </div>
 	<h1 class='is-family-monospace-danger'>
     <ul>
@@ -88,67 +88,61 @@
 
 <div class="container">
     <div class="content is-large">
-        <h4> By Number of Tickets Sold</h4>
-            {% if x %}
-                <canvas id='barChart' width='1000' height='400'></canvas>
-                <script> 
-                    var ctx = document.getElementById('barChart').getContext('2d');
-                    var barChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: {{ x | safe }},
-                            datasets: [{
-                                label: "Number of Tickets Sold to this Customer",
-                                data: {{ y | safe }},
-                                borderWidth:1}]},
-                            options: {
-                                scales: {
-                                    y: {
-                                        ticks: {
-                                            stepSize: 1
-                                        }
-                                    }
-                                },
-                                responsive:false
+        {% if x %}
+            <h4> By Number of Tickets Sold in the Last 6 months</h4>
+            <canvas id='barChart' width='1000' height='400'></canvas>
+            <script> 
+                var ctx = document.getElementById('barChart').getContext('2d');
+                var barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ x | safe }},
+                        datasets: [{
+                            label: "Number of Tickets Sold to this Customer",
+                            data: {{ y | safe }},
+                            borderWidth:1}]},
+                        options: {
+                            responsive:false,
+                            scales: {
+                                xAxes: [{scaleLabel: {display: true,labelString: 'Customers' }}],
+                                yAxes: [{scaleLabel: {display: true,labelString: 'Number of Tickets Sold' }}]
                             }
-                    });
-                </script>
-            {% else %}
-                <h6> <strong>You have no top customer. </strong></h6>
-            {% endif %}
+                        }
+                });
+            </script>
+        {% else %}
+            <h6> <strong>You have no top customer by ticket sold. </strong></h6>
+        {% endif %}
             
     </div>
+    <br><br>
 
     <div class="content is-large">
-            <h4> By Number Total Amount of Commission</h4>
-            {% if x2 %}
-                <canvas id='topCom' width='1000' height='400'></canvas>
-                <script> 
-                    var ctx = document.getElementById('topCom').getContext('2d');
-                    var barChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: {{ x2 | safe }},
-                            datasets: [{
-                                label: "Total Commission Earned (in $)",
-                                data: {{ y2 | safe }},
-                                borderWidth:1}]},
-                            options: {
-                                scales: {
-                                    x: { ticks: {beginAtZero: true}},
-                                    y: {
-                                        ticks: {
-                                            stepSize: 1
-                                        }
-                                    }
-                                },
-                                responsive:false
+        {% if x2 %}
+            <h4> By Number Total Amount of Commission in the Last Year</h4>
+            <canvas id='topCom' width='1000' height='400'></canvas>
+            <script> 
+                var ctx = document.getElementById('topCom').getContext('2d');
+                var barChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ x2 | safe }},
+                        datasets: [{
+                            label: "Total Commission Earned (in $)",
+                            data: {{ y2 | safe }},
+                            borderWidth:1}]},
+                        options: {
+                            responsive:false,
+                            scales: {
+                                xAxes: [{scaleLabel: {display: true,labelString: 'Customers' }}],
+                                yAxes: [{scaleLabel: {display: true,labelString: 'Total Commission ($)' }}]
                             }
-                    });
-                </script>
-            {% else %}
-                <h6> <strong>You have no top customer by commission. </strong></h6>
-            {% endif %}
+                        }    
+                });
+            </script>
+        {% else %}
+            <h6> <strong>You have no top customer by commission. </strong></h6>
+        {% endif %}
             
         </div>
 </div>

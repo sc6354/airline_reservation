@@ -210,6 +210,9 @@ def reports():
 @login_required
 def agentHome():
     today_date = date.today()
+    past_month = date.today() - timedelta(days=30)
+    past6months = date.today() - timedelta(days=180)
+    past_year = date.today() - timedelta(days=365)
     email = "%{0}%".format(current_user.username)
     airport1 = aliased(airport, name ='origin')
     airport2 = aliased(airport, name = 'destination')
@@ -226,10 +229,13 @@ def agentHome():
             .join(airport2, airport2.airport_name == flight.arrival_airport)\
             .filter(flight.departure_time >= today_date).all()
 
-    commission_query = flight.query.with_entities(func.sum(flight.price))\
+    commission_query = flight.query.with_entities(func.sum(flight.price).label('total sale'))\
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
-                         .filter(purchases.booking_agent_id == agent_id[0]).all()
+                         .filter(purchases.purchase_date >= past_month)\
+                         .filter(purchases.booking_agent_id == agent_id[0])\
+                         .order_by(desc('total sale')).all()
+
     commission = .1*float(commission_query[0][0])
 
     ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
@@ -238,20 +244,25 @@ def agentHome():
                          .filter(purchases.booking_agent_id == agent_id[0]).all()
 
     num_of_tickets = int(ticket_query[0][0])
-    ave_commission = commission/num_of_tickets
+    ave_commission = round(commission/num_of_tickets, 2)
 
     top5byticket = db.session.query(purchases.customer_email, func.count(purchases.customer_email))\
                              .filter(purchases.booking_agent_id == agent_id[0])\
-                             .group_by(purchases.customer_email).limit(5).all()
+                             .filter(purchases.purchase_date >= past6months)\
+                             .group_by(purchases.customer_email)\
+                             .order_by(func.count(purchases.customer_email)).limit(5).all()
 
     top5_labels = [row[0] for row in top5byticket]
     top5_values = [row[1] for row in top5byticket]
 
-    top5bycommission = db.session.query(purchases.customer_email, func.sum(flight.price))\
+    top5bycommission = db.session.query(purchases.customer_email, func.sum(flight.price).label('total sales'))\
                                  .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                                  .join(flight, flight.flight_num == ticket.flight_num)\
                                  .filter(purchases.booking_agent_id == agent_id[0])\
-                                 .group_by(purchases.customer_email).limit(5).all()
+                                 .filter(purchases.purchase_date >= past_year)\
+                                 .group_by(purchases.customer_email)\
+                                 .order_by(desc('total sales')).limit(5).all()
+
     top5_com = [row[0] for row in top5bycommission]
     top_com = [.1*float(row[1]) for row in top5bycommission]
 
