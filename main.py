@@ -186,7 +186,8 @@ def moreFlights():
                                        .filter(flight.departure_time <= end)\
                                        .filter(or_(airport1.airport_city == origin, airport1.airport_name == origin))\
                                        .filter(or_(airport2.airport_city == destination, airport2.airport_name == destination))\
-                                       .filter(flight.airline_name == airline[0]).distinct(flight.flight_num).all()
+                                       .filter(flight.airline_name == airline[0]).distinct(flight.flight_num)\
+                                       .order_by(asc(flight.departure_time)).all()
                                       
         if not flightsInDateRange:
             flash(airline[0] + ' has no flights for this period and route.')
