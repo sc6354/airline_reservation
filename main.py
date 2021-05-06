@@ -19,6 +19,7 @@ airport1 = aliased(airport, name ='origin')
 airport2 = aliased(airport, name = 'destination')     
 
 
+########## Search Flights Page ########## 
 @main.route('/', methods=["POST", 'GET'])
 def index():
     if request.method == 'POST':
@@ -51,14 +52,15 @@ def index():
     return render_template('index.html')
 
 
+########## Customer Home Page ########## 
 @main.route('/profile', methods=["POST", "GET"])
 @login_required
-#@roles_required('Customer')
 def profile():
     today_date = date.today()
     email = "%{0}%".format(current_user.username)
     fname = db.session.query(customer).filter(customer.email.like(email)).first()
 
+    # query upcoming flights
     upcoming_flights = db.session.query(purchases, flight, ticket, airport1, airport2)\
             .filter(purchases.customer_email.like(email))\
             .join(ticket, ticket.ticket_id == purchases.ticket_id)\
@@ -68,6 +70,7 @@ def profile():
             .filter(func.date(flight.departure_time) >= today_date)\
             .order_by(asc(flight.departure_time)).all()
 
+    # query past flights
     past_flights = db.session.query(purchases, flight, ticket, airport1, airport2)\
             .filter(purchases.customer_email.like(email))\
             .join(ticket, ticket.ticket_id == purchases.ticket_id)\
@@ -77,12 +80,14 @@ def profile():
             .filter(func.date(flight.departure_time) <= today_date)\
             .order_by(desc(flight.departure_time)).all()
 
-    # need flight, ticket, and purchases
+    # query total spending in past year 
     spending = flight.query.with_entities(func.sum(flight.price))\
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
-                         .filter(purchases.customer_email.like(email)).all()
-
+                         .filter(purchases.customer_email.like(email))\
+                         .filter(func.date(flight.departure_time)<= past_year).all()
+    
+    # query monthly spending 
     spending1 = db.session.query(func.month(purchases.purchase_date), func.sum(flight.price).label('monthly_total'))\
                           .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                           .join(flight, flight.flight_num == ticket.flight_num)\
@@ -124,7 +129,7 @@ def profile():
                                            all_spending = spending[0][0], x =labels, y =values)
     
 
-
+########## Airline Staff Home Page ########## 
 @main.route('/staff_home',methods=["POST", "GET"])
 @login_required
 def staffHome():
@@ -137,6 +142,7 @@ def staffHome():
     staff_name = db.session.query(airline_staff.first_name).filter(airline_staff.username==current_user.username).first()
     airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
     
+    # query upcoming flights
     flightsIn30Days = db.session.query(flight, airport1, airport2)\
                                 .join(airport1, airport1.airport_name == flight.departure_airport)\
                                 .join(airport2, airport2.airport_name == flight.arrival_airport)\
@@ -201,7 +207,7 @@ def staffHome():
                                              airline = airline[0], 
                                              all_upcoming_flights = flightsIn30Days)
 
-
+########## Airline Staff View All Flights Page ########## 
 @main.route('/more_flights', methods = ["POST", 'GET'])
 @login_required
 def moreFlights():
@@ -232,11 +238,11 @@ def moreFlights():
 
     return render_template('moreFlights.html')
 
-
+########## Airline Staff View Dynamic Reports Page ########## 
 @main.route('/reports', methods=["POST", "GET"])
 @login_required
 def reports():
-    #revenue breakdown in past month
+    # query revenue breakdown in past month
     #not null means there is an id in the agent coloumn of the purchase table
     indirect_revenue_month = db.session.query(purchases, func.sum(flight.price))\
                                 .join(ticket, ticket.ticket_id == purchases.ticket_id)\
@@ -249,7 +255,8 @@ def reports():
                                 .join(flight, flight.flight_num == ticket.flight_num)\
                                 .filter(purchases.purchase_date >= past_month)\
                                 .filter(purchases.booking_agent_id.is_(None)).all()
-
+    
+    # query revenue breakdonw in past year 
     indirect_revenue_year = db.session.query(purchases, func.sum(flight.price))\
                                 .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                                 .join(flight, flight.flight_num == ticket.flight_num)\
@@ -269,7 +276,7 @@ def reports():
         start = request.form.get('start')
         end = request.form.get('end')
 
-        #monthly ticket sale
+        # query monthly ticket sale
         results = db.session.query(func.month(purchases.purchase_date),func.count(purchases.ticket_id))\
                             .filter(purchases.purchase_date >= start)\
                             .filter(purchases.purchase_date <= end)\
@@ -282,7 +289,7 @@ def reports():
 
     return render_template('reports.html', month=month_data, labels=labels, year=year_data)
 
-
+########## Booking Agent Home Page ########## 
 @main.route('/agent_home',methods=["POST", "GET"])
 @login_required
 def agentHome():
@@ -297,6 +304,7 @@ def agentHome():
     fname = db.session.query(booking_agent).filter(booking_agent.email.like(email)).first()
     agent_id = db.session.query(booking_agent.booking_agent_id).filter(booking_agent.email.like(email)).first()
 
+    # query upcoming flights for their airline 
     upcoming_flights = db.session.query(purchases, customer, ticket, flight, airport1, airport2)\
             .filter(purchases.booking_agent_id== agent_id[0])\
             .join(customer, customer.email == purchases.customer_email)\
@@ -306,6 +314,7 @@ def agentHome():
             .join(airport2, airport2.airport_name == flight.arrival_airport)\
             .filter(flight.departure_time >= today_date).all()
 
+    # query their past month commission
     commission_query = flight.query.with_entities(func.sum(flight.price).label('total sale'))\
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
@@ -315,6 +324,7 @@ def agentHome():
 
     commission = .1*float(commission_query[0][0])
 
+    # query their past month ticket sales 
     ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
                          .join(ticket, ticket.flight_num == flight.flight_num)\
                          .join(purchases, purchases.ticket_id == ticket.ticket_id)\
@@ -324,6 +334,7 @@ def agentHome():
     num_of_tickets = int(ticket_query[0][0])
     ave_commission = round(commission/num_of_tickets, 2)
 
+    # query their top 5 clients by ticket sales
     top5byticket = db.session.query(purchases.customer_email, func.count(purchases.customer_email))\
                              .filter(purchases.booking_agent_id == agent_id[0])\
                              .filter(purchases.purchase_date >= past6months)\
@@ -333,6 +344,7 @@ def agentHome():
     top5_labels = [row[0] for row in top5byticket]
     top5_values = [row[1] for row in top5byticket]
 
+    # query their top 5 clients by commission in past year 
     top5bycommission = db.session.query(purchases.customer_email, func.sum(flight.price).label('total sales'))\
                                  .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                                  .join(flight, flight.flight_num == ticket.flight_num)\
@@ -344,7 +356,7 @@ def agentHome():
     top5_com = [row[0] for row in top5bycommission]
     top_com = [.1*float(row[1]) for row in top5bycommission]
 
-    ##selective commission days
+    # query selective commission days
     if request.method =='POST':
         start = request.form.get('agent_start')
         end = request.form.get('agent_end')
@@ -385,40 +397,39 @@ def agentHome():
                                            average=ave_commission, x=top5_labels, y=top5_values, 
                                            x2=top5_com, y2=top_com)
 
-    
+########## Airline Staff Views Page ########## 
 @login_required
 @main.route('/views', methods = ["GET"])
 def views():
-    ## ticket and purchases. customers
-    time_limit = date.today() - timedelta(days=365)
-    past_month = date.today() - timedelta(days=30)
     airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
-    #airport1 = aliased(airport, name ='origin')
-    #airport2 = aliased(airport, name = 'destination')
 
+    # query top flyers in the past year 
     top_flyers = db.session.query(customer.name, purchases.customer_email, func.count(purchases.customer_email))\
                            .filter(purchases.purchase_date <= date.today())\
-                           .filter(purchases.purchase_date >= time_limit)\
+                           .filter(purchases.purchase_date >= past_year)\
                            .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                            .join(customer, customer.email == purchases.customer_email)\
                            .group_by(customer.name,purchases.customer_email).all()
 
+    # query top Agents by number of ticket sold in past month
     topAgentsByticket30 = db.session.query(purchases.booking_agent_id, booking_agent.email, func.count(purchases.booking_agent_id))\
                             .filter(purchases.purchase_date <= date.today())\
                             .filter(purchases.purchase_date >= past_month)\
                             .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
                             .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
 
+    # query top Agents by number of ticket sold in past year
     topAgentsByticketYear = db.session.query(purchases.booking_agent_id, booking_agent.email, func.count(purchases.booking_agent_id))\
                             .filter(purchases.purchase_date <= date.today())\
-                            .filter(purchases.purchase_date >= time_limit)\
+                            .filter(purchases.purchase_date >= past_year)\
                             .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
                             .group_by(purchases.booking_agent_id, booking_agent.email).limit(5).all()
-
+    
+    # query top Agents by commission in past year 
     top5ByCommission = db.session.query(purchases.booking_agent_id, booking_agent.email, func.sum(flight.price))\
                                  .filter(purchases.booking_agent_id.isnot(None))\
                                  .filter(purchases.purchase_date <= date.today())\
-                                 .filter(purchases.purchase_date >= time_limit)\
+                                 .filter(purchases.purchase_date >= past_year)\
                                  .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                                  .join(flight, flight.flight_num == ticket.flight_num)\
                                  .join(booking_agent, booking_agent.booking_agent_id == purchases.booking_agent_id)\
@@ -429,7 +440,8 @@ def views():
         email = row[1]
         commission = .1*float(row[2])
         agents.append([id, email, commission])
-
+    
+    # query top 3 destinations in past 3 months 
     topDestinations = db.session.query(airport.airport_city, func.count(ticket.flight_num).label('total tickets'))\
                                 .join(flight, flight.arrival_airport==airport.airport_name)\
                                 .join(ticket, ticket.flight_num == flight.flight_num)\
@@ -438,12 +450,13 @@ def views():
                                 .filter(purchases.purchase_date >= (date.today() - timedelta(days=60)))\
                                 .group_by(airport.airport_city).order_by(desc('total tickets')).limit(3).all()
 
+    # query top 3 destinations in past year 
     topDestinationsYear = db.session.query(airport.airport_city, func.count(ticket.flight_num).label('total tickets'))\
                                 .join(flight, flight.arrival_airport==airport.airport_name)\
                                 .join(ticket, ticket.flight_num == flight.flight_num)\
                                 .join(purchases, purchases.ticket_id == ticket.ticket_id)\
                                 .filter(purchases.purchase_date <= date.today())\
-                                .filter(purchases.purchase_date >= (date.today() - timedelta(days=365)))\
+                                .filter(purchases.purchase_date >= past_year)\
                                 .group_by(airport.airport_city).order_by(desc('total tickets')).limit(3).all()
 
   
@@ -455,7 +468,7 @@ def views():
                                          top_places_in_3_months = topDestinations,
                                          top_places_in_year = topDestinationsYear)
 
-
+########## Customer and Agent Purchase Flight Page ########## 
 @main.route('/flights', methods=["POST", 'GET'])
 def flights():
     id = shortuuid.ShortUUID().random(length=11)
