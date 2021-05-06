@@ -15,6 +15,9 @@ today_date = date.today()
 past_month = date.today() - timedelta(days=30)
 past6months = date.today() - timedelta(days=180)
 past_year = date.today() - timedelta(days=365)
+airport1 = aliased(airport, name ='origin')
+airport2 = aliased(airport, name = 'destination')
+        
 
 @main.route('/', methods=["POST", 'GET'])
 def index():
@@ -23,8 +26,8 @@ def index():
         destination = request.form.get('destination').upper()
         date = request.form.get('date')
 
-        airport1 = aliased(airport, name ='origin')
-        airport2 = aliased(airport, name = 'destination')
+        #airport1 = aliased(airport, name ='origin')
+        #airport2 = aliased(airport, name = 'destination')
 
         all_flights = db.session.query(flight, airport1, airport2, airplane)\
                                 .join(airport1, airport1.airport_name == flight.departure_airport)\
@@ -103,8 +106,6 @@ def staffHome():
     airport_form = addNewAirport(request.form)
     status_form = changeStatus(request.form)
     flight_form = addNewFlight(request.form)
-    more_flights = viewMoreFlights(request.form)
-
 
     time_limit = date.today() + timedelta(days=30)
     staff_name = db.session.query(airline_staff.first_name).filter(airline_staff.username==current_user.username).first()
@@ -160,36 +161,38 @@ def staffHome():
         flash('New Flight Successfully Added.')
         return redirect(url_for('main.staffHome'))
     
-    if more_flights.validate():
-        o = more_flights.origin.data
-        d = more_flights.destination.data
-        s = more_flights.start_day.data
-        e = more_flights.end_day.data
-        airport1 = aliased(airport, name ='origin')
-        airport2 = aliased(airport, name = 'destination')
-        result = computate_uncertainty(o, d,s,e)
-
-        #more_flights = db.session.query(flight, airport1, airport2)\
-                                 #.join(airport1, airport1.airport_name == flight.departure_airport)\
-                                 #.join(airport2, airport2.airport_name == flight.arrival_airport)\
-                                 #.filter(flight.departure_time >= start)\
-                                 #.filter(flight.departure_time <= end).all()
-
-        return render_template('moreFlights.html', flights=result)
-    
     return render_template('staffHome.html', form = new_plane_form, 
                                              form2 = airport_form,
                                              form3 = status_form,
                                              form4 = flight_form,
-                                             form5 = more_flights,
                                              name = staff_name[0],
                                              airline = airline[0], 
                                              all_upcoming_flights = flightsIn30Days)
 
 
-@main.route('/more_flights', methods = ["POST"])
+@main.route('/more_flights', methods = ["POST", 'GET'])
 @login_required
 def moreFlights():
+    #airport1 = aliased(airport, name ='origin')
+    #airport2 = aliased(airport, name = 'destination')
+        
+    if request.method =='POST':
+        start = request.form.get('start')
+        end = request.form.get('end')
+        origin = request.form.get('origin').upper()
+        destination = request.form.get('destination').upper()
+        
+        airline = db.session.query(airline_staff.airline_name).filter(airline_staff.username==current_user.username).first()
+        flightsInDateRange = db.session.query(flight, airport1, airport2, airplane)\
+                                       .join(airport1, airport1.airport_name == flight.departure_airport)\
+                                       .join(airport2, airport2.airport_name == flight.arrival_airport)\
+                                       .filter(flight.departure_time >= start)\
+                                       .filter(flight.departure_time <= end)\
+                                       .filter(airport1.airport_city == origin)\
+                                       .filter(airport2.airport_city == destination)\
+                                       .filter(flight.airline_name == airline[0]).all()
+
+        return render_template('moreFlights.html', more_flights=flightsInDateRange, airline=airline[0])
     return render_template('moreFlights.html')
 
 
@@ -197,7 +200,7 @@ def moreFlights():
 @login_required
 def reports():
     #revenue breakdown in past month
-    #not null means there an id in the agent coloumn of the purchase table
+    #not null means there is an id in the agent coloumn of the purchase table
     indirect_revenue_month = db.session.query(purchases, func.sum(flight.price))\
                                 .join(ticket, ticket.ticket_id == purchases.ticket_id)\
                                 .join(flight, flight.flight_num == ticket.flight_num)\

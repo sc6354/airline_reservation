@@ -54,44 +54,6 @@
 		{% endif %}
 	</div>
 
-<div>
-	<div class="content is-large">
-		<h4 class='is-family-monospace-danger'>
-			View More Flights
-		</h4>
-	</div>
-	
-	<div class='field is-grouped is-grouped-centered'>
-		<form method="POST" action="{{ url_for('main.moreFlights')}}">
-			<div class="control has-icons-right"> 
-				<fieldset class="form-field">
-					{{ form5.start_day.label }}
-					{{ form5.start_day }}
-				</fieldset>
-			</div>
-			<div class="control has-icons-right">
-				<fieldset class="form-field">
-					{{ form5.end_day.label }}
-					{{ form5.end_day}}
-				</fieldset>
-			</div>
-			<div class="control has-icons-right">
-				<fieldset class="form-field">
-					{{ form5.origin.label }}
-					{{ form5.origin }}
-				</fieldset>
-			</div>
-			<div class="control has-icons-right">
-				<fieldset class="form-field">
-					{{ form5.destination.label }}
-					{{ form5.destination }}
-				</fieldset>
-			</div>
-			{{ form5.submit }}
-		</form>
-	</div>
-</div>
-
 <div class='container'>
 	<br><br><br>
 	<div class="content is-large">

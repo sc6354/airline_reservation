@@ -1,19 +1,87 @@
-{% extends "base2.html" %}
+{% extends 'base2.html' %}
 
 {% block content %}
 
+<div>
+	<br><br><br><br>
+	<div class="content is-large">
+		<h4> Enter information to view Flights</h4>
+        {{ more_flights }}
+        {{ airline}}
+	</div>
+</div>
+
 <div class="column is-4 is-offset-4">
-    <h1 class="title">All Flights in this Period</h1>
-    {% if (flights|length) == 0%}
-        <h1> No flights found. </h1>
-            {{ flights| length }} Flights.
-    {% endif %}
+    <form method="POST" action='/more_flights'>
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="start">
+            </div>
+        </div>
+        <div class="field">
+            <div class="control">
+                <input class="input" type="date" name="end">
+            </div>
+        </div>
+        <div class="field">
+            <div class="control">
+                <input class="input" name="origin" placeholder="Origin">
+            </div>
+        </div>
+        <div class="field">
+            <div class="control">
+                <input class="input" name="destination" placeholder="Destination">
+            </div>
+        </div>
+        <div class="field is-grouped is-grouped-centered">
+            <p class="control is-expanded">
+                <button class="button is-info is-primary">Submit</button>
+            </p>
+            <p class="control">
+                <a href="{{ url_for('main.staffHome') }}" class="button is-light">Return to Home</a>
+            </p>
+        </div>
+    </form>
 </div>
 
 
-{% if flights %}
-    {{ flights }}
+{% if more_flights %}
+    <div class="table-container">
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Airline </th>
+                <th>Aircraft Id</th>
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Flight Number</th>
+                <th>Route </th>
+                <th>Departing Time</th>
+                <th>Arrival Time</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+        </thred>
+        <tbody>
+            {% for row in more_flights %}
+            <tr> 
+                <td> {{ row.flight.airline_name}}</td>
+                <td> {{ row.flight.airplane_id }} </td>
+                <td> {{ row.origin.airport_city }} </td>
+                <td> {{ row.destination.airport_city }} </td>
+                <td> {{ row.flight.flight_num }} </td>
+                <td> {{ row.flight.departure_airport + " - " +row.flight.arrival_airport }} </td>
+                <td> {{ row.flight.departure_time }} </td>
+                <td> {{ row.flight.arrival_time }} </td>
+                <td> ${{ row.flight.price }} </td>
+                <td> {{ row.flight.status }}
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
 {% endif %}
+
 
 
 
