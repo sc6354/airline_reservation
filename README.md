@@ -1,2 +1,2 @@
-# airline_reservation
+# airline reservation flask web app
  NYUSH Databases Spring 2021 final project
