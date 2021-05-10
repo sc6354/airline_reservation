@@ -322,18 +322,21 @@ def agentHome():
                          .filter(purchases.booking_agent_id == agent_id[0])\
                          .order_by(desc('total sale')).all()
 
-    commission = .1*float(commission_query[0][0])
-
-    # query their past month ticket sales 
-    ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
-                         .join(ticket, ticket.flight_num == flight.flight_num)\
-                         .join(purchases, purchases.ticket_id == ticket.ticket_id)\
-                         .filter(purchases.purchase_date >= past_month)\
-                         .filter(purchases.booking_agent_id == agent_id[0]).all()
-
-    num_of_tickets = int(ticket_query[0][0])
-    ave_commission = round(commission/num_of_tickets, 2)
-
+    if commission_query[0][0] != None:
+        commission = .1*float(commission_query[0][0])
+        # query their past month ticket sales 
+        ticket_query = flight.query.with_entities(func.count(flight.flight_num))\
+                             .join(ticket, ticket.flight_num == flight.flight_num)\
+                             .join(purchases, purchases.ticket_id == ticket.ticket_id)\
+                             .filter(purchases.purchase_date >= past_month)\
+                             .filter(purchases.booking_agent_id == agent_id[0]).all()
+        num_of_tickets = int(ticket_query[0][0])
+        ave_commission = round(commission/num_of_tickets, 2)
+    else:
+        commission = 0
+        num_of_tickets = 0
+        ave_commission = 0
+    
     # query their top 5 clients by ticket sales
     top5byticket = db.session.query(purchases.customer_email, func.count(purchases.customer_email))\
                              .filter(purchases.booking_agent_id == agent_id[0])\
@@ -380,9 +383,9 @@ def agentHome():
             t = int(ticket_results[0][0])
             selected_ave_commission = round(selected_commission/t, 2)
         else:
-            selected_commission =0
+            selected_commission = 0
             t = 0
-            selected_ave_commission =0
+            selected_ave_commission = 0
         return render_template('agentHome.html',name = fname, email = current_user.username, 
                                 all_upcoming_flights = upcoming_flights,all_commission = commission, 
                                 num_of_tickets_sold=num_of_tickets, average=ave_commission,

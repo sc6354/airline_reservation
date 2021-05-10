@@ -53,7 +53,7 @@ def userSignup():
             email = request.form.get('email')
             name = request.form.get('name')
             pw = request.form.get('password')
-            building = request.form.get('address')
+            building = request.form.get('building_num')
             street = request.form.get('address')
             city = request.form.get('city')
             state = request.form.get('state')
@@ -74,7 +74,10 @@ def userSignup():
             elif(cust):
                 error = 'Email address {} is already registered. Go to the login page.'.format(email)
             else:
-                new_customer = customer(email = email, password = generate_password_hash(pw, method='sha256'), name = name)
+                new_customer = customer(email = email, password = generate_password_hash(pw, method='sha256'), name = name, 
+                                        building_number = building, street = street, city = city, state = state, phone_number = phone_number, 
+                                        passport_number = passport_num, passport_expiration = passport_expiration, 
+                                        passport_country=passport_country, date_of_birth = dob)
                 new_user = users(username=email, password = generate_password_hash(pw, method='sha256'))
                 db.session.add(new_user)
                 db.session.add(new_customer)

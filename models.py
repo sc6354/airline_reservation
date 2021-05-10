@@ -9,7 +9,16 @@ class customer(UserMixin, db.Model):
     #id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
     email = db.Column(db.String(100, collation='NOCASE'), primary_key=True)
     password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+    name = db.Column(db.String(50))
+    building_number = db.Column(db.String(30))
+    street = db.Column(db.String(30))
+    city = db.Column(db.String(30))
+    state = db.Column(db.String(30))
+    phone_number = db.Column(db.Integer)
+    passport_number= db.Column(db.String(30))
+    passport_expiration= db.Column(db.DateTime)
+    passport_country = db.Column(db.String(50))
+    date_of_birth = db.Column(db.DateTime)
 
 class users(UserMixin, db.Model):
     __table_args__ = {'extend_existing': True}
